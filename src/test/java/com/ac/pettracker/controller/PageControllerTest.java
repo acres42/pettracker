@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -76,5 +77,14 @@ class PageControllerTest {
         .perform(get("/pets/results").param("type", "dog"))
         .andExpect(status().is3xxRedirection())
         .andExpect(view().name("redirect:/search"));
+  }
+
+  @Test
+  void searchResultsRedirectsWithErrorWhenTypeIsMissing() throws Exception {
+    mockMvc
+        .perform(get("/pets/results").param("location", "46201"))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(view().name("redirect:/search"))
+        .andExpect(flash().attribute("error", "Please enter both animal type and location."));
   }
 }
