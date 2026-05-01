@@ -15,7 +15,13 @@
     </p>
 
     <ul>
-      <li th:each="pet : ${pets}" th:text="${pet}"></li>
+      <li th:each="pet : ${pets}">
+        <strong th:text="${pet.name}"></strong>
+        <span>
+          -
+        </span>
+        <span th:text="${pet.description}"></span>
+      </li>
     </ul>
   </main>
 </body>
