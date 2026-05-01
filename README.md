@@ -19,25 +19,41 @@ PetTracker is a Spring Boot web application for searching adoptable pets by type
 - Maven
 
 ## Project Structure
-
-src/
-├── main/
-│   ├── java/com/ac/pettracker/
-│   │   ├── controller/
-│   │   │   └── PageController.java
-│   │   └── PettrackerApplication.java
-│   └── resources/
-│       ├── templates/
-│       │   ├── index.html
-│       │   └── search.html
-│       └── static/
-│           └── css/
-│               └── styles.css
-└── test/
-└── java/com/ac/pettracker/
-└── controller/
-└── PageControllerTest.java
-
+```
+pettracker/
+├── pom.xml
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/
+│   │   │       └── ac/
+│   │   │           └── pettracker/
+│   │   │               ├── controller/
+│   │   │               │   └── PageController.java
+│   │   │               ├── service/
+│   │   │               │   └── PetService.java
+│   │   │               ├── model/
+│   │   │               │   └── Pet.java
+│   │   │               └── PettrackerApplication.java
+│   │   └── resources/
+│   │       ├── templates/
+│   │       │   ├── index.html
+│   │       │   ├── search.html
+│   │       │   └── results.html
+│   │       └── static/
+│   │           └── css/
+│   │               └── styles.css
+│   └── test/
+│       └── java/
+│           └── com/
+│               └── ac/
+│                   └── pettracker/
+│                       ├── controller/
+│                       │   └── PageControllerTest.java
+│                       └── PettrackerApplicationTests.java
+├── .gitignore
+└── mvnw / mvnw.cmd
+```
 ---
 
 ## Running Tests
@@ -58,9 +74,20 @@ Then visit http://localhost:8080 in your browser.
 ```
 Route        Description
 -----------------------------------------------------------
-/            Home page
+/                 Home page (index)
 
-/search      Search form page
+/search           Search form page
+                  - Displays search UI
+                  - Shows validation error (flash "error") if present
+
+/pets/results     Search results page
+                  - Query params:
+                      type (String)
+                      location (String)
+                  - Behavior:
+                      • Valid input → renders results.html with pets list
+                      • Empty results → shows "No pets found" state
+                      • Missing/blank input → redirects to /search with flash error
 ```
 ## Development Approach
 
