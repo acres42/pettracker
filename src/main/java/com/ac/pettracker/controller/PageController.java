@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class PageController {
@@ -30,9 +31,11 @@ public class PageController {
   public String results(
       @RequestParam(required = false) String type,
       @RequestParam(required = false) String location,
-      Model model) {
+      Model model,
+      RedirectAttributes redirectAttributes) {
 
     if (type == null || type.isBlank() || location == null || location.isBlank()) {
+      redirectAttributes.addFlashAttribute("error", "Please enter both animal type and location.");
       return "redirect:/search";
     }
 
