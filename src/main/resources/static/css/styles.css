@@ -13,7 +13,8 @@ body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6); /* adjust 0.4–0.8 */
+  background: rgba(0, 0, 0, 0.6);
+  /* adjust 0.4–0.8 */
   z-index: -1;
 }
 
@@ -78,27 +79,55 @@ p {
 
 
 @keyframes fadeInUp {
-
   from {
-
     opacity: 0;
-
     transform: translateY(20px);
-
   }
 
   to {
-
     opacity: 1;
-
     transform: translateY(0);
-
   }
-
 }
 
 .preview {
   margin-top: 4rem;
   font-size: 0.95rem;
   opacity: 0.7;
+}
+
+.results-panel {
+  max-width: 960px;
+}
+
+.pet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.pet-card {
+  padding: 1.25rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: left;
+}
+
+.pet-card h2 {
+  margin: 0 0 0.5rem;
+}
+
+.pet-type {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 2rem;
+  color: white;
 }

@@ -5,29 +5,37 @@
     <title>
       Results
     </title>
+    <link rel="stylesheet" href="/css/styles.css" />
   </head>
   <body>
-    <h1>
-      Search Results
-    </h1>
+    <main class="glass results-panel">
+      <p class="eyebrow">
+        Search results
+      </p>
 
-    <p>
-      Type:
-      <span th:text="${type}"></span>
-    </p>
-    <p>
-      Location:
-      <span th:text="${location}"></span>
-    </p>
+      <h1>
+        Available Pets
+      </h1>
 
-    <ul>
-      <li th:each="pet : ${pets}">
-        <strong th:text="${pet.name}"></strong>
-        <span>
-          -
-        </span>
-        <span th:text="${pet.description}"></span>
-      </li>
-    </ul>
+      <p class="lede">
+        Showing
+        <span th:text="${type}"></span>
+        results near
+        <span th:text="${location}"></span>
+        .
+      </p>
+
+      <section class="pet-grid">
+        <article class="pet-card" th:each="pet : ${pets}">
+          <h2 th:text="${pet.name}"></h2>
+          <p class="pet-type" th:text="${pet.type}"></p>
+          <p th:text="${pet.description}"></p>
+        </article>
+      </section>
+
+      <a class="back-link" href="/search">
+        Search again
+      </a>
+    </main>
   </body>
 </html>
