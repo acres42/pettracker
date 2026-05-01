@@ -10,12 +10,17 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(PageController.class)
-public class PageControllerTest {
+class PageControllerTest {
 
   @Autowired private MockMvc mockMvc;
 
   @Test
-  public void testHomePage() throws Exception {
+  void homePageReturnsIndexView() throws Exception {
     mockMvc.perform(get("/")).andExpect(status().isOk()).andExpect(view().name("index"));
+  }
+
+  @Test
+  void searchPageLoads() throws Exception {
+    mockMvc.perform(get("/search")).andExpect(status().isOk()).andExpect(view().name("search"));
   }
 }

@@ -10,4 +10,9 @@ public class PageController {
   public String home() {
     return "index";
   }
+
+  @GetMapping("/search")
+  String search() {
+    return "search";
+  }
 }
