@@ -27,7 +27,15 @@ public class PageController {
   }
 
   @GetMapping("/pets/results")
-  public String results(@RequestParam String type, @RequestParam String location, Model model) {
+  public String results(
+      @RequestParam(required = false) String type,
+      @RequestParam(required = false) String location,
+      Model model) {
+
+    if (type == null || type.isBlank() || location == null || location.isBlank()) {
+      return "redirect:/search";
+    }
+
     model.addAttribute("type", type);
     model.addAttribute("location", location);
     model.addAttribute("pets", petService.searchPets(type, location));

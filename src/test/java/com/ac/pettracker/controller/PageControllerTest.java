@@ -61,4 +61,20 @@ class PageControllerTest {
         .andExpect(model().attribute("location", "46201"))
         .andExpect(content().string(containsString("No pets found")));
   }
+
+  @Test
+  void searchResultsRedirectsToSearchWhenTypeIsMissing() throws Exception {
+    mockMvc
+        .perform(get("/pets/results").param("location", "46201"))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(view().name("redirect:/search"));
+  }
+
+  @Test
+  void searchResultsRedirectsToSearchWhenLocationIsMissing() throws Exception {
+    mockMvc
+        .perform(get("/pets/results").param("type", "dog"))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(view().name("redirect:/search"));
+  }
 }
