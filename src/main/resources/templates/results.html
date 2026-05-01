@@ -1,0 +1,21 @@
+<body>
+  <main>
+    <h1>
+      Search Results
+    </h1>
+
+    <p>
+      Type:
+      <span th:text="${type}"></span>
+    </p>
+
+    <p>
+      Location:
+      <span th:text="${location}"></span>
+    </p>
+
+    <ul>
+      <li th:each="pet : ${pets}" th:text="${pet}"></li>
+    </ul>
+  </main>
+</body>

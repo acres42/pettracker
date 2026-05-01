@@ -8,14 +8,34 @@
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
   <body>
-    <main class="glass">
+    <main class="glass search-panel">
+      <p class="eyebrow">
+        Find your next follow-up
+      </p>
+
       <h1>
         Search Pets
       </h1>
 
+      <p class="lede">
+        Search adoptable pets by animal type and ZIP code.
+      </p>
+
       <form class="search-bar" method="get" action="/pets/results">
-        <input name="type" placeholder="Dog, cat, rabbit..." required />
-        <input name="location" placeholder="ZIP code" required />
+        <label>
+          <span>
+            Animal type
+          </span>
+          <input name="type" placeholder="Dog, cat, rabbit..." required />
+        </label>
+
+        <label>
+          <span>
+            Location
+          </span>
+          <input name="location" placeholder="ZIP code" required />
+        </label>
+
         <button type="submit">
           Search
         </button>

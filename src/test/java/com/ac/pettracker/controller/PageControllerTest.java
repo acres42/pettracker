@@ -1,6 +1,7 @@
 package com.ac.pettracker.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -22,5 +23,14 @@ class PageControllerTest {
   @Test
   void searchPageLoads() throws Exception {
     mockMvc.perform(get("/search")).andExpect(status().isOk()).andExpect(view().name("search"));
+  }
+
+  @Test
+  void searchResultsPageLoadsWithFakePets() throws Exception {
+    mockMvc
+        .perform(get("/pets/results").param("type", "dog").param("location", "46201"))
+        .andExpect(status().isOk())
+        .andExpect(view().name("results"))
+        .andExpect(model().attributeExists("pets"));
   }
 }
