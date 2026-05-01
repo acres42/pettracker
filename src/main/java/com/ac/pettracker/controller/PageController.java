@@ -21,7 +21,8 @@ public class PageController {
   }
 
   @GetMapping("/search")
-  public String search() {
+  public String search(@RequestParam(name = "q", required = false) String query, Model model) {
+    model.addAttribute("query", query);
     return "search";
   }
 
@@ -29,7 +30,6 @@ public class PageController {
   public String results(@RequestParam String type, @RequestParam String location, Model model) {
     model.addAttribute("type", type);
     model.addAttribute("location", location);
-
     model.addAttribute("pets", petService.searchPets(type, location));
 
     return "results";
