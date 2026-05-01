@@ -38,7 +38,15 @@ class PageControllerTest {
   @Test
   void searchResultsPageLoadsWithFakePets() throws Exception {
     given(petService.searchPets("dog", "46201"))
-        .willReturn(List.of(new Pet("Buddy", "dog", "Friendly and adoptable")));
+        .willReturn(
+            List.of(
+                new Pet(
+                    "Buddy",
+                    "dog",
+                    "Golden Retriever",
+                    4,
+                    "Friendly dog",
+                    "/images/pets/buddy.jpg")));
 
     mockMvc
         .perform(get("/pets/results").param("type", "dog").param("location", "46201"))

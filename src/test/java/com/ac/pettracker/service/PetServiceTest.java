@@ -28,4 +28,15 @@ class PetServiceTest {
 
     assertThat(results).isEmpty();
   }
+
+  @Test
+  void searchPetsReturnsPetsWithBreedAgeAndImageUrl() {
+    var results = petService.searchPets("dog", "46201");
+
+    assertThat(results).isNotEmpty();
+
+    assertThat(results.getFirst().getBreed()).isNotBlank();
+    assertThat(results.getFirst().getAge()).isGreaterThan(0);
+    assertThat(results.getFirst().getImageUrl()).isNotBlank();
+  }
 }
