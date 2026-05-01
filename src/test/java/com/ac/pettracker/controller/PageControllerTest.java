@@ -1,7 +1,9 @@
 package com.ac.pettracker.controller;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -44,5 +46,19 @@ class PageControllerTest {
         .andExpect(model().attributeExists("pets"))
         .andExpect(model().attribute("type", "dog"))
         .andExpect(model().attribute("location", "46201"));
+  }
+
+  @Test
+  void searchResultsPageShowsEmptyStateWhenNoPetsFound() throws Exception {
+    given(petService.searchPets("bird", "46201")).willReturn(List.of());
+
+    mockMvc
+        .perform(get("/pets/results").param("type", "bird").param("location", "46201"))
+        .andExpect(status().isOk())
+        .andExpect(view().name("results"))
+        .andExpect(model().attributeExists("pets"))
+        .andExpect(model().attribute("type", "bird"))
+        .andExpect(model().attribute("location", "46201"))
+        .andExpect(content().string(containsString("No pets found")));
   }
 }
