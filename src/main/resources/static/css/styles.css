@@ -9,6 +9,10 @@ body {
   background-size: cover;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body::before {
   content: "";
   position: fixed;
@@ -22,7 +26,7 @@ main {
   animation: fadeInUp 0.8s ease-out;
 
   max-width: 800px;
-  margin: 4rem auto;
+  margin: 3rem auto;
   padding: 2rem;
   text-align: center;
   position: relative;
@@ -41,39 +45,64 @@ h1 {
 p {
   font-size: 1.2rem;
   opacity: 0.85;
+  margin: 0;
 }
 
 .search-bar {
   display: flex;
-  gap: 0.5rem;
-  margin-top: 6rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
   justify-content: center;
+  align-items: flex-end;
+}
+
+.search-bar label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  text-align: left;
+}
+
+.search-bar label span {
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.82;
 }
 
 .search-bar input {
-  width: 320px;
+  width: 280px;
   padding: 0.9rem 1rem;
   border-radius: 999px;
   border: none;
   outline: none;
   font-size: 1rem;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
 }
 
 .search-bar button {
-  padding: 0.9rem 1.5rem;
+  min-height: 46px;
+  padding: 0.9rem 1.7rem;
   border-radius: 999px;
   border: none;
   background: linear-gradient(135deg, #ff7a18, #ffb347);
   color: black;
   font-weight: bold;
   cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-bar button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(255, 122, 24, 0.3);
 }
 
 .glass {
   backdrop-filter: blur(12px);
   background: rgba(0, 0, 0, 0.5);
   border-radius: 16px;
-  padding: 3rem;
+  padding: clamp(1.4rem, 4vw, 3rem);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
 
@@ -91,43 +120,176 @@ p {
 }
 
 .preview {
-  margin-top: 4rem;
+  margin-top: 2rem;
   font-size: 0.95rem;
   opacity: 0.7;
 }
 
 .results-panel {
   max-width: 960px;
+  text-align: left;
+}
+
+.search-panel {
+  max-width: 880px;
+}
+
+.eyebrow {
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.8rem;
+  opacity: 0.72;
+}
+
+.lede {
+  margin-top: 0.6rem;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  opacity: 0.9;
 }
 
 .pet-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
-  margin-top: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.8rem;
 }
 
 .pet-card {
-  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 1rem;
   border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.08));
+  border: 1px solid rgba(255, 255, 255, 0.26);
   text-align: left;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pet-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.42);
 }
 
 .pet-card h2 {
-  margin: 0 0 0.5rem;
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.pet-card p:not(.pet-type) {
+  font-size: 0.96rem;
+  line-height: 1.45;
+}
+
+.pet-image {
+  display: block;
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  border-radius: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+}
+
+.pet-image-fallback {
+  height: 190px;
+  display: grid;
+  place-items: center;
+  border-radius: 0.8rem;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.92);
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.05));
+  border: 1px dashed rgba(255, 255, 255, 0.3);
 }
 
 .pet-type {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.8rem;
-  opacity: 0.75;
+  opacity: 0.78;
+  margin: 0;
+}
+
+.empty-state {
+  margin-top: 1.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 1rem;
+  padding: 1.6rem;
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.04));
+  text-align: center;
+}
+
+.empty-state h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1.45rem;
+}
+
+.empty-state p {
+  font-size: 1rem;
+  opacity: 0.9;
 }
 
 .back-link {
   display: inline-block;
-  margin-top: 2rem;
+  margin-top: 1.6rem;
   color: white;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  padding: 0.62rem 1rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.back-link:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.error-panel {
+  max-width: 720px;
+}
+
+.error-title {
+  margin: 0 0 0.7rem;
+}
+
+.error-message {
+  margin: 0;
+  line-height: 1.55;
+}
+
+@media (max-width: 640px) {
+  main {
+    margin: 1.3rem auto;
+    padding: 1rem;
+  }
+
+  h1 {
+    font-size: 2.2rem;
+  }
+
+  .search-bar {
+    align-items: stretch;
+  }
+
+  .search-bar label {
+    width: 100%;
+  }
+
+  .search-bar input {
+    width: 100%;
+  }
+
+  .search-bar button {
+    width: 100%;
+  }
+
+  .pet-image,
+  .pet-image-fallback {
+    height: 170px;
+  }
 }

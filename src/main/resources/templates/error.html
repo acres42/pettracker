@@ -8,10 +8,10 @@
 </head>
 
 <body>
-  <main class="glass">
-    <h1 th:text="${errorTitle}">Something went wrong</h1>
-    <p th:text="${errorMessage}">Please try again.</p>
-    <a href="/search">Back to search</a>
+  <main class="glass error-panel">
+    <h1 class="error-title" th:text="${errorTitle}">Something went wrong</h1>
+    <p class="error-message" th:text="${errorMessage}">Please try again.</p>
+    <a class="back-link" href="/search">Back to search</a>
   </main>
 </body>
 
