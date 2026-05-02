@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Error</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+
+<body>
+  <main class="glass">
+    <h1 th:text="${errorTitle}">Something went wrong</h1>
+    <p th:text="${errorMessage}">Please try again.</p>
+    <a href="/search">Back to search</a>
+  </main>
+</body>
+
+</html>

@@ -5,7 +5,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -59,6 +58,14 @@ class PageControllerTest {
   }
 
   @Test
+  void searchResultsReturnsBadRequestWhenParamsAreMissing() throws Exception {
+    mockMvc
+        .perform(get("/pets/results"))
+        .andExpect(status().isBadRequest())
+        .andExpect(view().name("error"));
+  }
+
+  @Test
   void searchResultsPageShowsEmptyStateWhenNoPetsFound() throws Exception {
     given(petService.searchPets("bird", "46201")).willReturn(List.of());
 
@@ -70,31 +77,6 @@ class PageControllerTest {
         .andExpect(model().attribute("type", "bird"))
         .andExpect(model().attribute("location", "46201"))
         .andExpect(content().string(containsString("No pets found")));
-  }
-
-  @Test
-  void searchResultsRedirectsToSearchWhenTypeIsMissing() throws Exception {
-    mockMvc
-        .perform(get("/pets/results").param("location", "46201"))
-        .andExpect(status().is3xxRedirection())
-        .andExpect(view().name("redirect:/search"));
-  }
-
-  @Test
-  void searchResultsRedirectsToSearchWhenLocationIsMissing() throws Exception {
-    mockMvc
-        .perform(get("/pets/results").param("type", "dog"))
-        .andExpect(status().is3xxRedirection())
-        .andExpect(view().name("redirect:/search"));
-  }
-
-  @Test
-  void searchResultsRedirectsWithErrorWhenTypeIsMissing() throws Exception {
-    mockMvc
-        .perform(get("/pets/results").param("location", "46201"))
-        .andExpect(status().is3xxRedirection())
-        .andExpect(view().name("redirect:/search"))
-        .andExpect(flash().attribute("error", "Please enter both animal type and location."));
   }
 
   @Test

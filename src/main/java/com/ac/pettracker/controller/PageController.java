@@ -1,11 +1,12 @@
 package com.ac.pettracker.controller;
 
+import com.ac.pettracker.model.Pet;
 import com.ac.pettracker.service.PetService;
+import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class PageController {
@@ -31,17 +32,16 @@ public class PageController {
   public String results(
       @RequestParam(required = false) String type,
       @RequestParam(required = false) String location,
-      Model model,
-      RedirectAttributes redirectAttributes) {
-
+      Model model) {
     if (type == null || type.isBlank() || location == null || location.isBlank()) {
-      redirectAttributes.addFlashAttribute("error", "Please enter both animal type and location.");
-      return "redirect:/search";
+      throw new IllegalArgumentException("Missing search parameters");
     }
+
+    List<Pet> pets = petService.searchPets(type, location);
 
     model.addAttribute("type", type);
     model.addAttribute("location", location);
-    model.addAttribute("pets", petService.searchPets(type, location));
+    model.addAttribute("pets", pets);
 
     return "results";
   }
