@@ -36,9 +36,17 @@
 
     <section class=" pet-grid" th:if="${!#lists.isEmpty(pets)}">
       <article class="pet-card" th:each="pet : ${pets}">
-        <h2 th:text="${pet.name}"></h2>
-        <p class="pet-type" th:text="${pet.type}"></p>
-        <p th:text="${pet.description}"></p>
+        <div th:if="${pet.imageUrl != null and !pet.imageUrl.isBlank()}">
+          <img th:src="${pet.imageUrl}" th:alt="${pet.name}" class="pet-image" />
+        </div>
+
+        <div th:unless="${pet.imageUrl != null and !pet.imageUrl.isBlank()}" class="pet-image-fallback">
+          No image available
+        </div>
+
+        <h2 th:text="${pet.name}">Buddy</h2>
+        <p class="pet-type" th:text="${pet.type}">dog</p>
+        <p th:text="${pet.description}">Friendly dog</p>
       </article>
     </section>
 

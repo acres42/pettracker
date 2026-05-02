@@ -2,6 +2,7 @@ package com.ac.pettracker.controller;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
@@ -94,5 +95,37 @@ class PageControllerTest {
         .andExpect(status().is3xxRedirection())
         .andExpect(view().name("redirect:/search"))
         .andExpect(flash().attribute("error", "Please enter both animal type and location."));
+  }
+
+  @Test
+  void searchResultsPageRendersPetImageWhenImageUrlExists() throws Exception {
+    when(petService.searchPets("dog", "46201"))
+        .thenReturn(
+            List.of(
+                new Pet(
+                    "Buddy",
+                    "dog",
+                    "Golden Retriever",
+                    4,
+                    "Friendly dog",
+                    "/images/pets/buddy.jpg")));
+
+    mockMvc
+        .perform(get("/pets/results").param("type", "dog").param("location", "46201"))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("<img")))
+        .andExpect(content().string(containsString("/images/pets/buddy.jpg")))
+        .andExpect(content().string(containsString("Buddy")));
+  }
+
+  @Test
+  void searchResultsPageRendersFallbackWhenImageUrlIsMissing() throws Exception {
+    when(petService.searchPets("dog", "46201"))
+        .thenReturn(List.of(new Pet("Buddy", "dog", "Golden Retriever", 4, "Friendly dog", "")));
+
+    mockMvc
+        .perform(get("/pets/results").param("type", "dog").param("location", "46201"))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("No image available")));
   }
 }
