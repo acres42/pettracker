@@ -17,4 +17,22 @@ public class PetService {
   public List<Pet> searchPets(String type, String location) {
     return petRepository.findByType(type);
   }
+
+  public List<Pet> searchPets(String type, String location, String sort) {
+    List<Pet> results = searchPets(type, location);
+
+    if ("name".equalsIgnoreCase(sort)) {
+      return results.stream()
+          .sorted((first, second) -> first.getName().compareToIgnoreCase(second.getName()))
+          .toList();
+    }
+
+    if ("type".equalsIgnoreCase(sort)) {
+      return results.stream()
+          .sorted((first, second) -> first.getType().compareToIgnoreCase(second.getType()))
+          .toList();
+    }
+
+    return results;
+  }
 }
