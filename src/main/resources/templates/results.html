@@ -3,6 +3,14 @@
 
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="View adoptable pet search results in PetTracker." />
+  <meta property="og:title" content="PetTracker Results" />
+  <meta property="og:description" content="Browse adoptable pet search results by type and location." />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png" />
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
   <title>
     Results
   </title>
@@ -10,6 +18,18 @@
 </head>
 
 <body>
+  <header class="site-header">
+    <a class="brand" href="/dashboard" aria-label="Go to dashboard">
+      <img class="site-logo" src="/images/favicon.svg" alt="PetTracker logo" />
+      <span class="brand-text">PetTracker</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="/search">Search</a>
+      <a href="/profile">Profile</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/logout">Logout</a>
+    </nav>
+  </header>
   <main class="glass results-panel">
     <p class="eyebrow">
       Search results
@@ -34,7 +54,7 @@
       </p>
     </section>
 
-    <section class=" pet-grid" th:if="${!#lists.isEmpty(pets)}">
+    <section class="pet-grid" th:if="${!#lists.isEmpty(pets)}">
       <article class="pet-card" th:each="pet : ${pets}">
         <div th:if="${pet.imageUrl != null and !pet.imageUrl.isBlank()}">
           <img th:src="${pet.imageUrl}" th:alt="${pet.name}" class="pet-image" />
@@ -47,6 +67,23 @@
         <h2 th:text="${pet.name}">Buddy</h2>
         <p class="pet-type" th:text="${pet.type}">dog</p>
         <p th:text="${pet.description}">Friendly dog</p>
+
+        <form class="save-form" method="post" action="/dashboard/save">
+          <input type="hidden" name="name" th:value="${pet.name}" />
+          <input type="hidden" name="type" th:value="${pet.type}" />
+          <input type="hidden" name="breed" th:value="${pet.breed}" />
+          <input type="hidden" name="age" th:value="${pet.age}" />
+          <input type="hidden" name="description" th:value="${pet.description}" />
+          <input type="hidden" name="imageUrl" th:value="${pet.imageUrl}" />
+          <button class="heart-save"
+            th:classappend="${savedPetKeys.contains(pet.name + '|' + pet.type + '|' + pet.breed + '|' + pet.age)} ? 'is-saved' : ''"
+            type="submit"
+            th:attr="aria-pressed=${savedPetKeys.contains(pet.name + '|' + pet.type + '|' + pet.breed + '|' + pet.age)},disabled=${savedPetKeys.contains(pet.name + '|' + pet.type + '|' + pet.breed + '|' + pet.age)} ? 'disabled' : null"
+            th:text="${savedPetKeys.contains(pet.name + '|' + pet.type + '|' + pet.breed + '|' + pet.age)} ? 'Saved ♥' : 'Save ♡'"
+            aria-label="Save pet to dashboard">
+            Save ♡
+          </button>
+        </form>
       </article>
     </section>
 

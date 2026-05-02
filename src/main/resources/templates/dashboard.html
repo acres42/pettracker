@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="View and manage your saved pets in the PetTracker dashboard." />
+  <meta property="og:title" content="PetTracker Dashboard" />
+  <meta property="og:description" content="Track saved pets and your follow-up workflow." />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png" />
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <title>Saved Pets Dashboard</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+
+<body>
+  <header class="site-header">
+    <a class="brand" href="/dashboard" aria-label="Go to dashboard">
+      <img class="site-logo" src="/images/favicon.svg" alt="PetTracker logo" />
+      <span class="brand-text">PetTracker</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="/search">Search</a>
+      <a href="/profile">Profile</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/logout">Logout</a>
+    </nav>
+  </header>
+
+  <main class="glass results-panel dashboard-panel">
+    <p class="eyebrow">Your workspace</p>
+    <h1>Saved Pets Dashboard</h1>
+
+    <section class="empty-state" th:if="${#lists.isEmpty(savedPets)}">
+      <h2>No saved pets yet</h2>
+      <p>Use the heart button on pet cards to add pets to this dashboard.</p>
+    </section>
+
+    <section class="table-wrap">
+      <table class="dashboard-table">
+        <thead>
+          <tr>
+            <th><a th:href="@{/dashboard(sort='name',dir='asc')}">Name</a></th>
+            <th><a th:href="@{/dashboard(sort='type',dir='asc')}">Type</a></th>
+            <th><a th:href="@{/dashboard(sort='breed',dir='asc')}">Breed</a></th>
+            <th><a th:href="@{/dashboard(sort='age',dir='asc')}">Age</a></th>
+            <th><a th:href="@{/dashboard(sort='keywords',dir='asc')}">Keywords</a></th>
+            <th><a th:href="@{/dashboard(sort='savedAt',dir='desc')}">Saved At</a></th>
+            <th><a th:href="@{/dashboard(sort='status',dir='asc')}">Status</a></th>
+            <th><a th:href="@{/dashboard(sort='notes',dir='asc')}">Notes</a></th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="pet : ${savedPets}">
+            <td data-label="Name" th:text="${pet.name}">Buddy</td>
+            <td data-label="Type" th:text="${pet.type}">dog</td>
+            <td data-label="Breed" th:text="${pet.breed}">Golden Retriever</td>
+            <td data-label="Age" th:text="${pet.age}">4</td>
+            <td data-label="Keywords" th:text="${pet.keywordsDisplay}">calm, fenced yard</td>
+            <td data-label="Saved At" th:text="${pet.savedAtDisplay}">01/01/2026, 10:30</td>
+            <td data-label="Status">
+              <select th:attr="form=${'update-form-' + pet.id}" name="status">
+                <option value="ADOPTED" th:selected="${pet.status.name() == 'ADOPTED'}">Adopted</option>
+                <option value="REJECTED" th:selected="${pet.status.name() == 'REJECTED'}">Rejected</option>
+                <option value="INTRODUCED" th:selected="${pet.status.name() == 'INTRODUCED'}">Introduced</option>
+                <option value="APPLIED" th:selected="${pet.status.name() == 'APPLIED'}">Applied</option>
+                <option value="ACCEPTED" th:selected="${pet.status.name() == 'ACCEPTED'}">Accepted</option>
+              </select>
+            </td>
+            <td data-label="Notes">
+              <textarea th:attr="form=${'update-form-' + pet.id}" name="notes" maxlength="500"
+                placeholder="Notes (max 500)" th:text="${pet.notes}"></textarea>
+            </td>
+            <td data-label="Actions">
+              <div class="action-buttons">
+                <form class="inline-update-form" th:attr="id=${'update-form-' + pet.id}" method="post"
+                  action="/dashboard/update">
+                  <input type="hidden" name="id" th:value="${pet.id}" />
+                  <button class="action-button action-update" type="submit" aria-label="Update saved pet">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <path d="M9 16.2l-3.5-3.5-1.4 1.4L9 19 20.3 7.7l-1.4-1.4z" fill="currentColor" />
+                    </svg>
+                    <span>Update</span>
+                  </button>
+                </form>
+                <form class="inline-delete-form" method="post" action="/dashboard/delete">
+                  <input type="hidden" name="id" th:value="${pet.id}" />
+                  <button class="action-button action-delete" type="submit" aria-label="Delete saved pet">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <path d="M6 7h12v2H6V7zm2 3h8l-1 9H9L8 10zm3-6h2l1 1h4v2H6V5h4l1-1z" fill="currentColor" />
+                    </svg>
+                    <span>Delete</span>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(savedPets)}">
+            <td colspan="9">No saved pets yet.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</body>
+
+</html>

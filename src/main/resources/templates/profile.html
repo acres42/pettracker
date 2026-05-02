@@ -4,14 +4,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="PetTracker error page for invalid search input or unexpected failures." />
-  <meta property="og:title" content="PetTracker Error" />
-  <meta property="og:description" content="An error occurred while processing your request." />
+  <meta name="description" content="Manage your PetTracker profile settings." />
+  <meta property="og:title" content="PetTracker Profile" />
+  <meta property="og:description" content="Profile and account settings page." />
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png" />
   <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
   <link rel="shortcut icon" href="/favicon.ico" />
-  <title>Error</title>
+  <title>Profile</title>
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
 
@@ -28,10 +28,19 @@
       <a href="/logout">Logout</a>
     </nav>
   </header>
-  <main class="glass error-panel">
-    <h1 class="error-title" th:text="${errorTitle}">Something went wrong</h1>
-    <p class="error-message" th:text="${errorMessage}">Please try again.</p>
-    <a class="back-link" href="/search">Back to search</a>
+
+  <main class="glass search-panel">
+    <p class="eyebrow">Account</p>
+    <h1>Profile</h1>
+    <p>Set your dashboard keywords once here. Saved pets inherit these profile keywords automatically.</p>
+    <form class="search-bar" method="post" action="/profile">
+      <label>
+        <span>Keywords</span>
+        <input type="text" name="keywords" th:value="${profileKeywords}"
+          placeholder="fenced yard, gentle, apartment-friendly" />
+      </label>
+      <button type="submit">Save profile keywords</button>
+    </form>
   </main>
 </body>
 

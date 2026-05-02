@@ -27,7 +27,11 @@ class AppErrorControllerTest {
         .perform(get("/pets/results").param("location", "46201"))
         .andExpect(status().isBadRequest())
         .andExpect(view().name("error"))
-        .andExpect(content().string(containsString("Invalid search request")));
+        .andExpect(content().string(containsString("Invalid search request")))
+        .andExpect(content().string(containsString("name=\"viewport\"")))
+        .andExpect(content().string(containsString("name=\"description\"")))
+        .andExpect(content().string(containsString("property=\"og:title\"")))
+        .andExpect(content().string(containsString("rel=\"icon\"")));
   }
 
   @Test

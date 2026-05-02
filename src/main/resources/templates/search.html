@@ -1,45 +1,68 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Search adoptable pets by type and location in PetTracker." />
+  <meta property="og:title" content="PetTracker Search" />
+  <meta property="og:description" content="Find adoptable pets by type and ZIP code." />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png" />
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <title>
+    Search Pets
+  </title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+
+<body>
+  <header class="site-header">
+    <a class="brand" href="/dashboard" aria-label="Go to dashboard">
+      <img class="site-logo" src="/images/favicon.svg" alt="PetTracker logo" />
+      <span class="brand-text">PetTracker</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="/search">Search</a>
+      <a href="/profile">Profile</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/logout">Logout</a>
+    </nav>
+  </header>
+  <main class="glass search-panel">
+    <p class="eyebrow">
+      Find your next best friend
+    </p>
+
+    <h1>
       Search Pets
-    </title>
-    <link rel="stylesheet" href="/css/styles.css" />
-  </head>
-  <body>
-    <main class="glass search-panel">
-      <p class="eyebrow">
-        Find your next best friend
-      </p>
+    </h1>
 
-      <h1>
-        Search Pets
-      </h1>
+    <p class="lede">
+      Search adoptable pets by animal type and ZIP code.
+    </p>
 
-      <p class="lede">
-        Search adoptable pets by animal type and ZIP code.
-      </p>
+    <form class="search-bar" method="get" action="/pets/results">
+      <label>
+        <span>
+          Animal type
+        </span>
+        <input name="type" placeholder="Dog, cat, rabbit..." required />
+      </label>
 
-      <form class="search-bar" method="get" action="/pets/results">
-        <label>
-          <span>
-            Animal type
-          </span>
-          <input name="type" placeholder="Dog, cat, rabbit..." required />
-        </label>
+      <label>
+        <span>
+          Location
+        </span>
+        <input name="location" placeholder="ZIP code" required />
+      </label>
 
-        <label>
-          <span>
-            Location
-          </span>
-          <input name="location" placeholder="ZIP code" required />
-        </label>
+      <button type="submit">
+        Search
+      </button>
+    </form>
+  </main>
+</body>
 
-        <button type="submit">
-          Search
-        </button>
-      </form>
-    </main>
-  </body>
 </html>

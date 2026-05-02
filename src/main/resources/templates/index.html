@@ -1,31 +1,68 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="stylesheet" href="/css/styles.css" />
-    <title>
-      Pet Interest Tracker
-    </title>
-  </head>
-  <body>
-    <main>
-      <h1>
-        Pet Interest Tracker
-      </h1>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Log in to PetTracker to search pets and manage your saved pet dashboard." />
+  <meta property="og:title" content="PetTracker Login" />
+  <meta property="og:description" content="Sign in to search adoptable pets and track your saved interests." />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png" />
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <title>
+    PetTracker Login
+  </title>
+</head>
+
+<body>
+  <header class="site-header">
+    <a class="brand" href="/dashboard" aria-label="Go to dashboard">
+      <img class="site-logo" src="/images/favicon.svg" alt="PetTracker logo" />
+      <span class="brand-text">PetTracker</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="/search">Search</a>
+      <a href="/profile">Profile</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/logout">Logout</a>
+    </nav>
+  </header>
+  <main class="glass search-panel">
+    <p class="eyebrow">
+      Welcome back
+    </p>
+    <h1>
+      Log In
+    </h1>
+    <p>
+      Sign in to search adoptable pets and manage your saved pet dashboard.
+    </p>
+    <form class="search-bar" method="get" action="/search">
+      <label>
+        <span>
+          Email
+        </span>
+        <input type="email" name="email" placeholder="you@example.com" required />
+      </label>
+      <label>
+        <span>
+          Password
+        </span>
+        <input type="password" name="password" placeholder="Enter password" required />
+      </label>
+      <button type="submit">
+        Log In
+      </button>
+    </form>
+    <section class="preview">
       <p>
-        Search adoptable pets and save the ones you want to follow up on.
+        New here? Account creation and full authorization are scheduled for Milestone 25.
       </p>
-      <form class="search-bar">
-        <input type="text" placeholder="Search for dogs, cats, breeds..." />
-        <button type="submit">
-          Search
-        </button>
-      </form>
-      <section class="preview">
-        <p>
-          Browse adoptable pets across shelters near you.
-        </p>
-      </section>
-    </main>
-  </body>
+    </section>
+  </main>
+</body>
+
 </html>
