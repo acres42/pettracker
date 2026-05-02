@@ -2,11 +2,13 @@ package com.ac.pettracker.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.ac.pettracker.repository.PetRepository;
 import org.junit.jupiter.api.Test;
 
 class PetServiceTest {
 
-  private final PetService petService = new PetService();
+  private final PetRepository petRepository = new PetRepository();
+  private final PetService petService = new PetService(petRepository);
 
   @Test
   void searchPetsReturnsOnlyMatchingType() {
