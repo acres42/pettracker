@@ -1,67 +1,63 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Log in to PetTracker to search pets and manage your saved pet dashboard." />
-  <meta property="og:title" content="PetTracker Login" />
-  <meta property="og:description" content="Sign in to search adoptable pets and track your saved interests." />
+  <meta name="description" content="Create your PetTracker account to start searching and saving adoptable pets." />
+  <meta property="og:title" content="PetTracker Sign Up" />
+  <meta property="og:description" content="Join PetTracker and start building your saved pet dashboard." />
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png" />
   <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
   <link rel="shortcut icon" href="/favicon.ico" />
   <link rel="stylesheet" href="/css/styles.css" />
   <title>
-    PetTracker Login
+    PetTracker Sign Up
   </title>
 </head>
 
 <body>
   <header class="site-header">
-    <a class="brand" href="/dashboard" aria-label="Go to dashboard">
+    <a class="brand" href="/" aria-label="Go to login page">
       <img class="site-logo" src="/images/favicon.svg" alt="PetTracker logo" />
       <span class="brand-text">PetTracker</span>
     </a>
     <nav class="site-nav" aria-label="Primary navigation">
-      <a href="/dashboard">Dashboard</a>
-      <a href="/search">Search</a>
-      <a href="/profile">Profile</a>
-      <a th:href="${session.authUserId != null ? '/logout' : '/'}"
-        th:text="${session.authUserId != null ? 'Logout' : 'Login'}">Login</a>
+      <a href="/">Login</a>
     </nav>
   </header>
   <main class="glass search-panel">
     <p class="eyebrow">
-      Welcome back
+      New to PetTracker
     </p>
     <h1>
-      Log In
+      Sign Up
     </h1>
     <p>
-      Sign in to search adoptable pets and manage your saved pet dashboard.
+      Create your account and start building your saved pet dashboard.
     </p>
-    <form class="search-bar" method="post" action="/auth/login">
+    <form class="search-bar" method="post" action="/auth/register">
       <label>
         <span>
           Email
         </span>
-        <input type="email" name="email" placeholder="you@example.com" required />
+        <input type="email" name="email" placeholder="new-user@example.com" required />
       </label>
       <label>
         <span>
           Password
         </span>
-        <input type="password" name="password" placeholder="Enter password" required />
+        <input type="password" name="password" placeholder="8+ characters" minlength="8" required />
       </label>
       <button type="submit">
-        Log In
+        Create Account
       </button>
     </form>
     <section class="preview">
       <p>
-        New here?
-        <a class="auth-link" href="/signup">Sign up</a>
+        Already have an account?
+        <a class="auth-link" href="/">Log in</a>
       </p>
     </section>
   </main>

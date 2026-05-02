@@ -7,10 +7,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import com.ac.pettracker.service.AuthService;
 import com.ac.pettracker.service.PetService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -21,10 +23,13 @@ class AppErrorControllerTest {
 
   @MockitoBean private PetService petService;
 
+  @MockitoBean private AuthService authService;
+
   @Test
   void missingTypeShowsErrorPage() throws Exception {
+    MockHttpSession session = authenticatedSession();
     mockMvc
-        .perform(get("/pets/results").param("location", "46201"))
+        .perform(get("/pets/results").session(session).param("location", "46201"))
         .andExpect(status().isBadRequest())
         .andExpect(view().name("error"))
         .andExpect(content().string(containsString("Invalid search request")))
@@ -36,8 +41,9 @@ class AppErrorControllerTest {
 
   @Test
   void missingLocationShowsErrorPage() throws Exception {
+    MockHttpSession session = authenticatedSession();
     mockMvc
-        .perform(get("/pets/results").param("type", "dog"))
+        .perform(get("/pets/results").session(session).param("type", "dog"))
         .andExpect(status().isBadRequest())
         .andExpect(view().name("error"))
         .andExpect(content().string(containsString("Invalid search request")));
@@ -46,11 +52,20 @@ class AppErrorControllerTest {
   @Test
   void serviceExceptionShowsErrorPage() throws Exception {
     when(petService.searchPets("dog", "46201")).thenThrow(new RuntimeException("boom"));
+    MockHttpSession session = authenticatedSession();
 
     mockMvc
-        .perform(get("/pets/results").param("type", "dog").param("location", "46201"))
+        .perform(
+            get("/pets/results").session(session).param("type", "dog").param("location", "46201"))
         .andExpect(status().isInternalServerError())
         .andExpect(view().name("error"))
         .andExpect(content().string(containsString("Something went wrong")));
+  }
+
+  private MockHttpSession authenticatedSession() {
+    MockHttpSession session = new MockHttpSession();
+    session.setAttribute("authUserId", 1L);
+    session.setAttribute("authUserEmail", "user@example.com");
+    return session;
   }
 }

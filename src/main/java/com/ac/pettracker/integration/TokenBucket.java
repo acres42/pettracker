@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
  * <p>- Bucket has a capacity (e.g., 3 tokens) - Tokens refill at a fixed rate (e.g., 1 token per
  * 1000ms) - Each operation consumes 1 token - If no tokens available, caller waits for refill
  *
- * <p>Interview talking points: - Used by AWS, Google, Netflix for API rate limiting - Allows
- * "bursty" traffic up to capacity - Fairness: everyone gets same refill rate - Better than
- * exponential backoff for APIs with known rate limits
+ * <p>- Used by AWS, Google, Netflix for API rate limiting - Allows "bursty" traffic up to capacity
+ * - Fairness: everyone gets same refill rate - Better than exponential backoff for APIs with known
+ * rate limits
  */
 public class TokenBucket {
 

@@ -1,5 +1,47 @@
+@font-face {
+  font-family: "EB Garamond";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/eb-garamond/EBGaramond-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "EB Garamond";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/eb-garamond/EBGaramond-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/inter/Inter-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/inter/Inter-SemiBold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/inter/Inter-Bold.ttf") format("truetype");
+}
+
 :root {
   color-scheme: dark;
+  --font-sans: "Inter", sans-serif;
+  --font-serif: "EB Garamond", serif;
   --bg-night: #09121a;
   --bg-ink: #112536;
   --panel: rgba(7, 19, 28, 0.84);
@@ -30,7 +72,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   color: var(--text);
   background:
     radial-gradient(circle at top left, rgba(242, 166, 90, 0.22), transparent 32%),
@@ -117,7 +159,7 @@ main {
 }
 
 .brand-text {
-  font-family: "Iowan Old Style", "Palatino Linotype", serif;
+  font-family: var(--font-serif);
   font-size: 1.3rem;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -155,7 +197,7 @@ main {
 h1,
 h2 {
   margin: 0;
-  font-family: "Iowan Old Style", "Palatino Linotype", serif;
+  font-family: var(--font-serif);
 }
 
 h1 {
@@ -195,6 +237,126 @@ p {
   border-top: 1px solid rgba(171, 209, 231, 0.14);
 }
 
+.profile-card {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(171, 209, 231, 0.18);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
+}
+
+.profile-card h2 {
+  margin-bottom: 0.75rem;
+}
+
+.profile-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.profile-item {
+  padding: 0.75rem;
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(171, 209, 231, 0.14);
+}
+
+.profile-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(246, 247, 242, 0.66);
+}
+
+.profile-value {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--text);
+}
+
+.keyword-label {
+  align-items: start;
+}
+
+.keyword-help {
+  color: rgba(246, 247, 242, 0.62);
+  font-size: 0.82rem;
+}
+
+.keyword-warning {
+  color: rgba(214, 221, 227, 0.72);
+  font-size: 0.78rem;
+}
+
+.keyword-warning.is-active {
+  color: rgba(214, 221, 227, 0.96);
+}
+
+.keyword-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.16rem;
+  margin-top: 0.2rem;
+}
+
+.keyword-tag {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: fit-content;
+  gap: 0;
+  padding: 3px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.48);
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.keyword-tag-text {
+  color: rgba(56, 63, 72, 0.96);
+  font-size: 0.82rem;
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+  padding: 3px;
+}
+
+.keyword-tag-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 0;
+  flex: 0 0 auto;
+  height: auto;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(56, 63, 72, 0.96);
+  cursor: pointer;
+  padding: 3px;
+  line-height: 1;
+  font-weight: 700;
+  font-size: 0.58rem;
+}
+
+.auth-link {
+  display: inline-block;
+  margin-left: 0.35rem;
+  color: #ffd07c;
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.auth-link:hover,
+.auth-link:focus-visible {
+  border-bottom-color: rgba(255, 208, 124, 0.9);
+}
+
 .search-bar {
   display: grid;
   gap: 0.85rem;
@@ -206,7 +368,7 @@ p {
   gap: 0.45rem;
 }
 
-.search-bar label span {
+.search-bar label>span {
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -215,6 +377,7 @@ p {
 }
 
 .search-bar input,
+.search-bar select,
 .dashboard-table input,
 .dashboard-table select,
 .dashboard-table textarea {
@@ -235,7 +398,8 @@ p {
 }
 
 .search-bar input:focus,
-.search-bar button:focus,
+.search-bar select:focus,
+.search-bar button:not(.keyword-tag-remove):focus,
 .back-link:focus,
 .dashboard-table input:focus,
 .dashboard-table select:focus,
@@ -245,7 +409,7 @@ p {
   box-shadow: 0 0 0 3px rgba(242, 166, 90, 0.16);
 }
 
-.search-bar button,
+.search-bar button:not(.keyword-tag-remove),
 .heart-save,
 .action-button,
 .back-link {
@@ -256,7 +420,7 @@ p {
   cursor: pointer;
 }
 
-.search-bar button {
+.search-bar button:not(.keyword-tag-remove) {
   width: 100%;
   padding: 0.95rem 1.25rem;
   background: linear-gradient(135deg, var(--accent), #ffd07c);
@@ -264,7 +428,7 @@ p {
   box-shadow: 0 12px 24px rgba(217, 121, 37, 0.28);
 }
 
-.search-bar button:hover,
+.search-bar button:not(.keyword-tag-remove):hover,
 .heart-save:hover,
 .action-button:hover,
 .back-link:hover {
@@ -514,7 +678,7 @@ p {
     align-items: end;
   }
 
-  .search-bar button {
+  .search-bar button:not(.keyword-tag-remove) {
     grid-column: span 2;
     width: auto;
     justify-self: start;
@@ -527,6 +691,14 @@ p {
 
   .action-buttons {
     gap: 0.6rem;
+  }
+
+  .profile-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profile-item-wide {
+    grid-column: span 2;
   }
 }
 

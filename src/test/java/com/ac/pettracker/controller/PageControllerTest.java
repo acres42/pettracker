@@ -13,8 +13,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.ac.pettracker.model.Pet;
+import com.ac.pettracker.model.UserAccount;
+import com.ac.pettracker.service.AuthService;
 import com.ac.pettracker.service.PetService;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +33,8 @@ class PageControllerTest {
   @Autowired private MockMvc mockMvc;
 
   @MockitoBean private PetService petService;
+
+  @MockitoBean private AuthService authService;
 
   @Test
   void homePageReturnsIndexView() throws Exception {
@@ -49,13 +54,28 @@ class PageControllerTest {
         .andExpect(content().string(containsString("href=\"/dashboard\"")))
         .andExpect(content().string(containsString("href=\"/search\"")))
         .andExpect(content().string(containsString("href=\"/profile\"")))
-        .andExpect(content().string(containsString("href=\"/logout\"")));
+        .andExpect(content().string(containsString(">Login</a>")));
+  }
+
+  @Test
+  void signupPageReturnsSignupView() throws Exception {
+    mockMvc
+        .perform(get("/signup"))
+        .andExpect(status().isOk())
+        .andExpect(view().name("signup"))
+        .andExpect(content().string(containsString("name=\"viewport\"")))
+        .andExpect(content().string(containsString("name=\"description\"")))
+        .andExpect(content().string(containsString("property=\"og:title\"")))
+        .andExpect(content().string(containsString("rel=\"icon\"")))
+        .andExpect(content().string(containsString("method=\"post\" action=\"/auth/register\"")))
+        .andExpect(content().string(containsString("Create Account")))
+        .andExpect(content().string(containsString("href=\"/\"")));
   }
 
   @Test
   void searchPageLoads() throws Exception {
     mockMvc
-        .perform(get("/search"))
+        .perform(get("/search").session(authenticatedSession()))
         .andExpect(status().isOk())
         .andExpect(view().name("search"))
         .andExpect(content().string(containsString("name=\"viewport\"")))
@@ -79,7 +99,11 @@ class PageControllerTest {
                     "/images/pets/buddy.jpg")));
 
     mockMvc
-        .perform(get("/pets/results").param("type", "dog").param("location", "46201"))
+        .perform(
+            get("/pets/results")
+                .session(authenticatedSession())
+                .param("type", "dog")
+                .param("location", "46201"))
         .andExpect(status().isOk())
         .andExpect(view().name("results"))
         .andExpect(model().attributeExists("pets"))
@@ -109,6 +133,8 @@ class PageControllerTest {
                 new Pet("Milo", "dog", "Beagle", 2, "Curious dog", "/images/pets/milo.jpg")));
 
     MockHttpSession session = new MockHttpSession();
+    session.setAttribute("authUserId", 1L);
+    session.setAttribute("authUserEmail", "user@example.com");
 
     MvcResult beforeSave =
         mockMvc
@@ -157,7 +183,7 @@ class PageControllerTest {
   @Test
   void searchResultsReturnsBadRequestWhenParamsAreMissing() throws Exception {
     mockMvc
-        .perform(get("/pets/results"))
+        .perform(get("/pets/results").session(authenticatedSession()))
         .andExpect(status().isBadRequest())
         .andExpect(view().name("error"));
   }
@@ -167,7 +193,11 @@ class PageControllerTest {
     given(petService.searchPets("bird", "46201")).willReturn(List.of());
 
     mockMvc
-        .perform(get("/pets/results").param("type", "bird").param("location", "46201"))
+        .perform(
+            get("/pets/results")
+                .session(authenticatedSession())
+                .param("type", "bird")
+                .param("location", "46201"))
         .andExpect(status().isOk())
         .andExpect(view().name("results"))
         .andExpect(model().attributeExists("pets"))
@@ -190,7 +220,11 @@ class PageControllerTest {
                     "/images/pets/buddy.jpg")));
 
     mockMvc
-        .perform(get("/pets/results").param("type", "dog").param("location", "46201"))
+        .perform(
+            get("/pets/results")
+                .session(authenticatedSession())
+                .param("type", "dog")
+                .param("location", "46201"))
         .andExpect(status().isOk())
         .andExpect(content().string(containsString("<img")))
         .andExpect(content().string(containsString("/images/pets/buddy.jpg")))
@@ -203,15 +237,47 @@ class PageControllerTest {
         .thenReturn(List.of(new Pet("Buddy", "dog", "Golden Retriever", 4, "Friendly dog", "")));
 
     mockMvc
-        .perform(get("/pets/results").param("type", "dog").param("location", "46201"))
+        .perform(
+            get("/pets/results")
+                .session(authenticatedSession())
+                .param("type", "dog")
+                .param("location", "46201"))
         .andExpect(status().isOk())
         .andExpect(content().string(containsString("No image available")));
   }
 
   @Test
+  void loginRedirectsToSearchWhenCredentialsAreValid() throws Exception {
+    UserAccount user = new UserAccount("user@example.com", "$2a$hash");
+    given(authService.authenticate("user@example.com", "password123"))
+        .willReturn(Optional.of(user));
+
+    mockMvc
+        .perform(
+            post("/auth/login").param("email", "user@example.com").param("password", "password123"))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/search"));
+  }
+
+  @Test
+  void registerRedirectsToSearchWhenPayloadIsValid() throws Exception {
+    given(authService.register("new@example.com", "password123")).willReturn(true);
+    UserAccount user = new UserAccount("new@example.com", "$2a$hash");
+    given(authService.authenticate("new@example.com", "password123")).willReturn(Optional.of(user));
+
+    mockMvc
+        .perform(
+            post("/auth/register")
+                .param("email", "new@example.com")
+                .param("password", "password123"))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/search"));
+  }
+
+  @Test
   void dashboardPageLoads() throws Exception {
     mockMvc
-        .perform(get("/dashboard"))
+        .perform(get("/dashboard").session(authenticatedSession()))
         .andExpect(status().isOk())
         .andExpect(view().name("dashboard"))
         .andExpect(content().string(containsString("Saved Pets Dashboard")))
@@ -221,18 +287,29 @@ class PageControllerTest {
   @Test
   void profilePageLoads() throws Exception {
     mockMvc
-        .perform(get("/profile"))
+        .perform(get("/profile").session(authenticatedSession()))
         .andExpect(status().isOk())
         .andExpect(view().name("profile"))
         .andExpect(content().string(containsString("Profile")))
-        .andExpect(content().string(containsString("site-header")));
+        .andExpect(content().string(containsString("site-header")))
+        .andExpect(content().string(containsString("First Name")))
+        .andExpect(content().string(containsString("Last Name")))
+        .andExpect(content().string(containsString("Email Address")))
+        .andExpect(content().string(containsString("action=\"/profile/password\"")))
+        .andExpect(content().string(containsString("action=\"/profile/preferences\"")));
   }
 
   @Test
   void profileKeywordsPopulateSavedPetDashboardColumn() throws Exception {
     MvcResult profileResult =
         mockMvc
-            .perform(post("/profile").param("keywords", "calm, fenced yard"))
+            .perform(
+                post("/profile/preferences")
+                    .session(authenticatedSession())
+                    .param("species", "dog")
+                    .param("weight", "25-50lbs")
+                    .param("breed", "beagle")
+                    .param("keywords", "calm, fenced yard"))
             .andExpect(status().is3xxRedirection())
             .andExpect(redirectedUrl("/profile"))
             .andReturn();
@@ -261,6 +338,35 @@ class PageControllerTest {
   }
 
   @Test
+  void passwordUpdateRedirectsToSuccessWhenCurrentPasswordIsValid() throws Exception {
+    given(authService.updatePassword("user@example.com", "old-password", "new-password123"))
+        .willReturn(true);
+
+    mockMvc
+        .perform(
+            post("/profile/password")
+                .session(authenticatedSession())
+                .param("currentPassword", "old-password")
+                .param("newPassword", "new-password123")
+                .param("confirmPassword", "new-password123"))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/profile?passwordUpdated=1"));
+  }
+
+  @Test
+  void passwordUpdateRedirectsToMismatchWhenConfirmationFails() throws Exception {
+    mockMvc
+        .perform(
+            post("/profile/password")
+                .session(authenticatedSession())
+                .param("currentPassword", "old-password")
+                .param("newPassword", "new-password123")
+                .param("confirmPassword", "different-pass123"))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/profile?passwordError=mismatch"));
+  }
+
+  @Test
   void logoutRedirectsHome() throws Exception {
     mockMvc
         .perform(get("/logout"))
@@ -274,6 +380,7 @@ class PageControllerTest {
         mockMvc
             .perform(
                 post("/dashboard/save")
+                    .session(authenticatedSession())
                     .param("name", "Buddy")
                     .param("type", "dog")
                     .param("breed", "Golden Retriever")
@@ -299,7 +406,7 @@ class PageControllerTest {
   void dashboardShowsSortableColumnsAndRequiredOrder() throws Exception {
     MvcResult result =
         mockMvc
-            .perform(get("/dashboard"))
+            .perform(get("/dashboard").session(authenticatedSession()))
             .andExpect(status().isOk())
             .andExpect(view().name("dashboard"))
             .andExpect(content().string(containsString("sort=name")))
@@ -323,6 +430,7 @@ class PageControllerTest {
         mockMvc
             .perform(
                 post("/dashboard/save")
+                    .session(authenticatedSession())
                     .param("name", "Buddy")
                     .param("type", "dog")
                     .param("breed", "Golden Retriever")
@@ -353,6 +461,7 @@ class PageControllerTest {
         mockMvc
             .perform(
                 post("/dashboard/save")
+                    .session(authenticatedSession())
                     .param("name", "Milo")
                     .param("type", "cat")
                     .param("breed", "Tabby")
@@ -382,6 +491,7 @@ class PageControllerTest {
         mockMvc
             .perform(
                 post("/dashboard/save")
+                    .session(authenticatedSession())
                     .param("name", "Buddy")
                     .param("type", "dog")
                     .param("breed", "Golden Retriever")
@@ -408,6 +518,7 @@ class PageControllerTest {
         mockMvc
             .perform(
                 post("/dashboard/save")
+                    .session(authenticatedSession())
                     .param("name", "Buddy")
                     .param("type", "dog")
                     .param("breed", "Golden Retriever")
@@ -444,6 +555,7 @@ class PageControllerTest {
         mockMvc
             .perform(
                 post("/dashboard/save")
+                    .session(authenticatedSession())
                     .param("name", "Zoe")
                     .param("type", "dog")
                     .param("breed", "Mix")
@@ -483,5 +595,12 @@ class PageControllerTest {
             .andReturn();
     String notesHtml = sortedByNotes.getResponse().getContentAsString();
     assertThat(notesHtml.indexOf("Amy")).isLessThan(notesHtml.indexOf("Zoe"));
+  }
+
+  private MockHttpSession authenticatedSession() {
+    MockHttpSession session = new MockHttpSession();
+    session.setAttribute("authUserId", 1L);
+    session.setAttribute("authUserEmail", "user@example.com");
+    return session;
   }
 }

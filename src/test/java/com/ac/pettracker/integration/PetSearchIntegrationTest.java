@@ -17,6 +17,11 @@ public class PetSearchIntegrationTest {
 
   @Test
   public void testPetSearch() throws Exception {
-    mockMvc.perform(get("/search")).andExpect(status().isOk());
+    mockMvc
+        .perform(
+            get("/search")
+                .sessionAttr("authUserId", 1L)
+                .sessionAttr("authUserEmail", "user@example.com"))
+        .andExpect(status().isOk());
   }
 }

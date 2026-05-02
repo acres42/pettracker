@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
   <meta charset="UTF-8" />
@@ -22,25 +22,196 @@
       <span class="brand-text">PetTracker</span>
     </a>
     <nav class="site-nav" aria-label="Primary navigation">
+      <a href="/dashboard">Dashboard</a>
       <a href="/search">Search</a>
       <a href="/profile">Profile</a>
-      <a href="/dashboard">Dashboard</a>
-      <a href="/logout">Logout</a>
+      <a th:href="${session.authUserId != null ? '/logout' : '/'}"
+        th:text="${session.authUserId != null ? 'Logout' : 'Login'}">Logout</a>
     </nav>
   </header>
 
   <main class="glass search-panel">
     <p class="eyebrow">Account</p>
     <h1>Profile</h1>
-    <p>Set your dashboard keywords once here. Saved pets inherit these profile keywords automatically.</p>
-    <form class="search-bar" method="post" action="/profile">
-      <label>
-        <span>Keywords</span>
-        <input type="text" name="keywords" th:value="${profileKeywords}"
-          placeholder="fenced yard, gentle, apartment-friendly" />
-      </label>
-      <button type="submit">Save profile keywords</button>
-    </form>
+    <p>Update your account details and pet preferences to improve your personalized pet suggestions.</p>
+
+    <section class="profile-card">
+      <h2>Contact Details</h2>
+      <div class="profile-grid">
+        <div class="profile-item">
+          <span class="profile-label">First Name</span>
+          <span class="profile-value"
+            th:text="${profileFirstName != null && !profileFirstName.isBlank() ? profileFirstName : 'Not set'}">Not
+            set</span>
+        </div>
+        <div class="profile-item">
+          <span class="profile-label">Last Name</span>
+          <span class="profile-value"
+            th:text="${profileLastName != null && !profileLastName.isBlank() ? profileLastName : 'Not set'}">Not
+            set</span>
+        </div>
+        <div class="profile-item profile-item-wide">
+          <span class="profile-label">Email Address</span>
+          <span class="profile-value" th:text="${profileEmail}">user@example.com</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="profile-card">
+      <h2>Update Password</h2>
+      <form class="search-bar" method="post" action="/profile/password">
+        <label>
+          <span>Current Password</span>
+          <input type="password" name="currentPassword" autocomplete="current-password" required />
+        </label>
+        <label>
+          <span>New Password</span>
+          <input type="password" name="newPassword" minlength="8" autocomplete="new-password" required />
+        </label>
+        <label>
+          <span>Confirm New Password</span>
+          <input type="password" name="confirmPassword" minlength="8" autocomplete="new-password" required />
+        </label>
+        <button type="submit">Update Password</button>
+      </form>
+    </section>
+
+    <section class="profile-card">
+      <h2>Pets You May Like</h2>
+      <form class="search-bar" method="post" action="/profile/preferences">
+        <label>
+          <span>Species</span>
+          <select name="species">
+            <option value="" th:selected="${profileSpecies == null || profileSpecies.isBlank()}">Select species</option>
+            <option value="dog" th:selected="${profileSpecies == 'dog'}">Dog</option>
+            <option value="cat" th:selected="${profileSpecies == 'cat'}">Cat</option>
+            <option value="bird" th:selected="${profileSpecies == 'bird'}">Bird</option>
+            <option value="bunny" th:selected="${profileSpecies == 'bunny'}">Bunny</option>
+            <option value="lizard" th:selected="${profileSpecies == 'lizard'}">Lizard</option>
+          </select>
+        </label>
+        <label>
+          <span>Weight</span>
+          <select name="weight">
+            <option value="" th:selected="${profileWeight == null || profileWeight.isBlank()}">Select weight</option>
+            <option value="&lt;25 lbs" th:selected="${profileWeight == '<25 lbs'}">&lt;25 lbs</option>
+            <option value="25-50lbs" th:selected="${profileWeight == '25-50lbs'}">25-50lbs</option>
+            <option value="60-100lbs" th:selected="${profileWeight == '60-100lbs'}">60-100lbs</option>
+            <option value=">100lbs" th:selected="${profileWeight == '>100lbs'}">&gt;100lbs</option>
+          </select>
+        </label>
+        <label>
+          <span>Breed</span>
+          <input type="text" name="breed" th:value="${profileBreed}" placeholder="Golden Retriever, Siamese, etc." />
+        </label>
+        <label class="keyword-label">
+          <span>Keywords</span>
+          <input id="keywordInput" type="text" placeholder="friendly, low-shed, apartment" autocomplete="off" />
+          <input id="keywordsField" type="hidden" name="keywords" th:value="${profileKeywords}" />
+          <div id="keywordsTags" class="keyword-tags" aria-live="polite"></div>
+          <small class="keyword-help">Type a word, then press comma or Enter to add a tag.</small>
+          <small id="keywordWarning" class="keyword-warning" aria-live="polite">Maximum 5 keywords. Extra entries will
+            be ignored.</small>
+        </label>
+        <button type="submit">Save Preferences</button>
+      </form>
+    </section>
+    <script>
+      (() => {
+        const MAX_KEYWORDS = 5;
+        const input = document.getElementById("keywordInput");
+        const hidden = document.getElementById("keywordsField");
+        const container = document.getElementById("keywordsTags");
+        const warning = document.getElementById("keywordWarning");
+        if (!input || !hidden || !container || !warning) {
+          return;
+        }
+
+        const keywords = (hidden.value || "")
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean)
+          .slice(0, MAX_KEYWORDS);
+
+        function syncHiddenValue() {
+          hidden.value = keywords.join(", ");
+        }
+
+        function updateWarningState() {
+          const full = keywords.length >= MAX_KEYWORDS;
+          warning.classList.toggle("is-active", full);
+          input.setAttribute("aria-invalid", full ? "true" : "false");
+        }
+
+        function renderTags() {
+          container.innerHTML = "";
+          keywords.forEach((keyword) => {
+            const tag = document.createElement("span");
+            tag.className = "keyword-tag";
+
+            const text = document.createElement("span");
+            text.className = "keyword-tag-text";
+            text.textContent = keyword;
+
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "keyword-tag-remove";
+            remove.setAttribute("aria-label", `Remove ${keyword}`);
+            remove.textContent = "x";
+            remove.addEventListener("click", () => {
+              const index = keywords.indexOf(keyword);
+              if (index > -1) {
+                keywords.splice(index, 1);
+                syncHiddenValue();
+                renderTags();
+                updateWarningState();
+              }
+            });
+
+            tag.appendChild(text);
+            tag.appendChild(remove);
+            container.appendChild(tag);
+          });
+        }
+
+        function addKeyword(rawValue) {
+          const value = rawValue.trim();
+          if (!value) {
+            return;
+          }
+          if (keywords.length >= MAX_KEYWORDS) {
+            updateWarningState();
+            return;
+          }
+          if (!keywords.includes(value)) {
+            keywords.push(value);
+            syncHiddenValue();
+            renderTags();
+            updateWarningState();
+          }
+        }
+
+        input.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            addKeyword(input.value);
+            input.value = "";
+          }
+        });
+
+        input.addEventListener("input", () => {
+          if (input.value.includes(",")) {
+            const values = input.value.split(",");
+            values.slice(0, -1).forEach(addKeyword);
+            input.value = values.at(-1) || "";
+          }
+        });
+
+        renderTags();
+        syncHiddenValue();
+        updateWarningState();
+      })();
+    </script>
   </main>
 </body>
 
