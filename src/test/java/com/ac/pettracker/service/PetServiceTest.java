@@ -4,15 +4,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.ac.pettracker.integration.RescueGroupsClient;
 import com.ac.pettracker.model.Pet;
 import com.ac.pettracker.repository.PetRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.client.RestClient;
 
 class PetServiceTest {
 
+  private final RescueGroupsClient rescueGroupsClient =
+      new RescueGroupsClient(RestClient.builder().build(), new ObjectMapper(), "");
   private final PetRepository petRepository = new PetRepository();
-  private final PetService petService = new PetService(petRepository);
+  private final PetService petService = new PetService(rescueGroupsClient, petRepository);
 
   @Test
   void searchPetsReturnsOnlyMatchingType() {
@@ -73,5 +78,40 @@ class PetServiceTest {
     List<Pet> results = petService.searchPets("dog", "46201", null, 1, 2);
 
     assertEquals(0, results.size());
+  }
+
+  @Test
+  void searchPetsUsesApiResultsWhenAvailable() {
+    RescueGroupsClient apiClient =
+        new RescueGroupsClient(RestClient.builder().build(), new ObjectMapper(), "") {
+          @Override
+          public List<Pet> fetchPets(String type, String location) {
+            return List.of(
+                new Pet("Rex", "dog", "Husky", 3, "Energetic and social", "https://image"));
+          }
+        };
+    PetService apiBackedService = new PetService(apiClient, petRepository);
+
+    List<Pet> results = apiBackedService.searchPets("dog", "46201");
+
+    assertEquals(1, results.size());
+    assertEquals("Rex", results.getFirst().getName());
+  }
+
+  @Test
+  void searchPetsFallsBackToRepositoryWhenApiReturnsNoResults() {
+    RescueGroupsClient apiClient =
+        new RescueGroupsClient(RestClient.builder().build(), new ObjectMapper(), "") {
+          @Override
+          public List<Pet> fetchPets(String type, String location) {
+            return List.of();
+          }
+        };
+    PetService apiBackedService = new PetService(apiClient, petRepository);
+
+    List<Pet> results = apiBackedService.searchPets("dog", "46201");
+
+    assertTrue(results.size() >= 2);
+    assertThat(results).extracting(Pet::getName).contains("Buddy");
   }
 }

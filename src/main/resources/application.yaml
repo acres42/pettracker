@@ -1,3 +1,11 @@
 spring:
   application:
     name: pettracker
+
+rescuegroups:
+  base-url: ${RESCUEGROUPS_BASE_URL:https://api.rescuegroups.org/v5}
+  api-key: ${RESCUEGROUPS_API_KEY:}
+
+logging:
+  level:
+    com.ac.pettracker.integration.RescueGroupsClient: DEBUG

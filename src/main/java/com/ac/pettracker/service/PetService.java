@@ -1,5 +1,6 @@
 package com.ac.pettracker.service;
 
+import com.ac.pettracker.integration.RescueGroupsClient;
 import com.ac.pettracker.model.Pet;
 import com.ac.pettracker.repository.PetRepository;
 import java.util.List;
@@ -10,15 +11,23 @@ import org.springframework.stereotype.Service;
 @Service
 public class PetService {
 
+  private final RescueGroupsClient rescueGroupsClient;
   private final PetRepository petRepository;
   private static final Logger logger = LoggerFactory.getLogger(PetService.class);
 
-  public PetService(PetRepository petRepository) {
+  public PetService(RescueGroupsClient rescueGroupsClient, PetRepository petRepository) {
+    this.rescueGroupsClient = rescueGroupsClient;
     this.petRepository = petRepository;
   }
 
   public List<Pet> searchPets(String type, String location) {
     logger.info("Filtering pets by type={} location={}", type, location);
+    List<Pet> apiPets = rescueGroupsClient.fetchPets(type, location);
+    if (!apiPets.isEmpty()) {
+      return apiPets;
+    }
+
+    logger.info("Falling back to local repository data for type={}", type);
     return petRepository.findByType(type);
   }
 

@@ -13,3 +13,6 @@
 
 # Logs
 *.log
+
+#api keys
+src/main/resources/application-local.properties
