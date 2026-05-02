@@ -1,6 +1,7 @@
 package com.ac.pettracker.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.ac.pettracker.model.Pet;
@@ -57,5 +58,20 @@ class PetServiceTest {
     List<Pet> pets = petService.searchPets("dog", "46201", "type");
 
     assertTrue(pets.get(0).getType().compareTo(pets.get(1).getType()) <= 0);
+  }
+
+  @Test
+  void searchPetsReturnsFirstPage() {
+    List<Pet> results = petService.searchPets("dog", "46201", null, 0, 2);
+
+    assertEquals(2, results.size());
+    assertEquals("Buddy", results.get(0).getName());
+  }
+
+  @Test
+  void searchPetsReturnsSecondPage() {
+    List<Pet> results = petService.searchPets("dog", "46201", null, 1, 2);
+
+    assertEquals(0, results.size());
   }
 }

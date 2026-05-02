@@ -35,4 +35,17 @@ public class PetService {
 
     return results;
   }
+
+  public List<Pet> searchPets(String type, String location, String sort, int page, int size) {
+    List<Pet> results = searchPets(type, location, sort);
+
+    int start = page * size;
+    int end = Math.min(start + size, results.size());
+
+    if (start >= results.size()) {
+      return List.of();
+    }
+
+    return results.subList(start, end);
+  }
 }
