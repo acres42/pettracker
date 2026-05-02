@@ -22,6 +22,13 @@ class PetRepositoryTest {
     List<Pet> dogs = repo.findByType("dog");
 
     assertFalse(dogs.isEmpty());
-    assertTrue(dogs.stream().allMatch((p) -> p.getType().equalsIgnoreCase("dog")));
+    assertTrue(dogs.stream().allMatch((pet) -> pet.getType().equalsIgnoreCase("dog")));
+  }
+
+  @Test
+  void findByTypeReturnsEmptyListWhenNoTypeMatches() {
+    List<Pet> lizards = repo.findByType("lizard");
+
+    assertTrue(lizards.isEmpty());
   }
 }
