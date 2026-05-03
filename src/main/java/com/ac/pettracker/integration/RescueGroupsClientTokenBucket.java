@@ -46,6 +46,13 @@ public class RescueGroupsClientTokenBucket {
     this(RestClient.builder().baseUrl(baseUrl).build(), new ObjectMapper(), apiKey);
   }
 
+  /**
+   * Testing constructor: uses a pre-built {@link RestClient} with a 3-token-per-second bucket.
+   *
+   * @param restClient the HTTP client to use
+   * @param objectMapper the JSON mapper
+   * @param apiKey the RescueGroups API key
+   */
   public RescueGroupsClientTokenBucket(
       RestClient restClient, ObjectMapper objectMapper, String apiKey) {
     this.restClient = restClient;
@@ -55,6 +62,16 @@ public class RescueGroupsClientTokenBucket {
     this.rateLimiter = new TokenBucket(3, 1000);
   }
 
+  /**
+   * Fetches available pets from the RescueGroups API for the given type and location, using
+   * token-bucket rate limiting between retry attempts.
+   *
+   * <p>Returns an empty list when the API key is blank, on a 4xx error, or after all retries fail.
+   *
+   * @param type the pet species (e.g., "dog", "cat")
+   * @param location the search location string passed in the request body
+   * @return non-null list of pets returned by the API; empty on failure or no results
+   */
   public List<Pet> fetchPets(String type, String location) {
     if (apiKey == null || apiKey.isBlank()) {
       logger.warn("RescueGroups API key not configured; returning no API results");
@@ -103,7 +120,8 @@ public class RescueGroupsClientTokenBucket {
       } catch (HttpServerErrorException e) {
         if (attempt < MAX_RETRIES) {
           logger.warn(
-              "Token-bucket retry: Transient error (HTTP {}) on attempt {}/{}; token bucket will enforce rate limit",
+              "Token-bucket retry: Transient error (HTTP {}) on attempt {}/{};"
+                  + " token bucket will enforce rate limit",
               e.getStatusCode(),
               attempt,
               MAX_RETRIES);

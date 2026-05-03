@@ -127,6 +127,61 @@ Then open:
 http://localhost:8080
 ```
 
+## Local MySQL with Docker
+
+This project supports running MySQL locally via Docker and applying schema changes with Flyway
+migrations.
+
+1. Copy the local MySQL env template:
+
+```bash
+cp .env.mysql.example .env.mysql
+```
+
+2. Start MySQL:
+
+```bash
+docker compose --env-file .env.mysql up -d mysql
+```
+
+3. Run the app with the MySQL profile:
+
+```bash
+export SPRING_PROFILES_ACTIVE=mysql
+./mvnw spring-boot:run
+```
+
+4. Stop MySQL when finished:
+
+```bash
+docker compose --env-file .env.mysql down
+```
+
+Schema migrations live in:
+
+```text
+src/main/resources/db/migration/mysql/
+```
+
+Current baseline schema:
+
+- `user_accounts`
+- `user_preferences`
+
+## How Schema Design Works in Spring Boot
+
+In Java/Spring Boot, the professional equivalent of JS ORM migrations is usually Flyway or
+Liquibase.
+
+Recommended workflow:
+
+1. Design tables/relations as SQL migration files (`V1__...sql`, `V2__...sql`, etc.)
+2. Commit each migration with code changes that depend on it
+3. Keep `ddl-auto=validate` in MySQL environments so entities are checked against schema
+4. Let Flyway apply migrations automatically on app startup
+
+This gives predictable, reviewable schema history and is interview-friendly for senior reviewers.
+
 ## Routes
 
 ```text

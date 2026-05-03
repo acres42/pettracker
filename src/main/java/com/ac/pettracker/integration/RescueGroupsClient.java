@@ -17,6 +17,12 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClient;
 
+/**
+ * HTTP client for the RescueGroups API with exponential back-off retry on transient errors.
+ *
+ * <p>Retries up to {@code MAX_RETRIES} times with jittered exponential delays before giving up and
+ * returning an empty list.
+ */
 @Component
 public class RescueGroupsClient {
 
@@ -37,6 +43,13 @@ public class RescueGroupsClient {
     this(RestClient.builder().baseUrl(baseUrl).build(), new ObjectMapper(), apiKey, baseBackoffMs);
   }
 
+  /**
+   * Testing constructor: uses a pre-built {@link RestClient} with a 1 000 ms base back-off.
+   *
+   * @param restClient the HTTP client to use
+   * @param objectMapper the JSON mapper
+   * @param apiKey the RescueGroups API key
+   */
   public RescueGroupsClient(RestClient restClient, ObjectMapper objectMapper, String apiKey) {
     this(restClient, objectMapper, apiKey, 1000);
   }
@@ -50,6 +63,16 @@ public class RescueGroupsClient {
     this.random = new Random();
   }
 
+  /**
+   * Fetches available pets from the RescueGroups API for the given type and location.
+   *
+   * <p>Retries up to {@code MAX_RETRIES} times on 5xx server errors using exponential back-off.
+   * Returns an empty list when the API key is blank, on a 4xx error, or after all retries fail.
+   *
+   * @param type the pet species (e.g., "dog", "cat")
+   * @param location the search location string passed in the request body
+   * @return non-null list of pets returned by the API; empty on failure or no results
+   */
   public List<Pet> fetchPets(String type, String location) {
     if (apiKey == null || apiKey.isBlank()) {
       logger.warn("RescueGroups API key not configured; returning no API results");

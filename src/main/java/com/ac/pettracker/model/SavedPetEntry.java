@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
+/** Session-scoped model for a pet saved to the user's dashboard, including notes and status. */
 public class SavedPetEntry {
 
   private static final DateTimeFormatter SAVED_AT_FORMATTER =
@@ -23,6 +24,20 @@ public class SavedPetEntry {
   private SavedPetStatus status;
   private LocalDate statusDate;
 
+  /**
+   * Creates a new saved pet entry with the given pet details and tracking state.
+   *
+   * @param name pet's name
+   * @param type pet species (e.g., dog, cat)
+   * @param breed pet breed
+   * @param age pet age in years
+   * @param description short description of the pet
+   * @param imageUrl URL or path to the pet's image
+   * @param keywords profile keywords copied from the user's preferences at save time
+   * @param notes user-supplied notes (truncated to 500 characters)
+   * @param status initial adoption status
+   * @param statusDate date the status was last set
+   */
   public SavedPetEntry(
       String name,
       String type,
@@ -80,6 +95,11 @@ public class SavedPetEntry {
     return savedAt;
   }
 
+  /**
+   * Returns the saved-at timestamp formatted as {@code dd/MM/yyyy, HH:mm}.
+   *
+   * @return formatted save timestamp
+   */
   public String getSavedAtDisplay() {
     return savedAt.format(SAVED_AT_FORMATTER);
   }
@@ -103,6 +123,11 @@ public class SavedPetEntry {
     return notes;
   }
 
+  /**
+   * Sets the user's notes for this pet, truncating to 500 characters if necessary.
+   *
+   * @param notes the notes text; {@code null} is treated as an empty string
+   */
   public void setNotes(String notes) {
     if (notes == null) {
       this.notes = "";
@@ -127,6 +152,11 @@ public class SavedPetEntry {
     this.statusDate = statusDate;
   }
 
+  /**
+   * Returns a human-readable label for the current adoption status.
+   *
+   * @return display string such as "Adopted" or "Introduced"
+   */
   public String getStatusDisplay() {
     return switch (status) {
       case ADOPTED -> "Adopted";

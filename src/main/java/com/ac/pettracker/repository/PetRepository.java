@@ -2,12 +2,17 @@ package com.ac.pettracker.repository;
 
 import com.ac.pettracker.model.Pet;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+/**
+ * Pet data access component that delegates to the JPA repository when running under Spring, or
+ * falls back to a hardcoded list when used directly in unit tests.
+ */
 @Repository
 public class PetRepository {
 
-  private final List<Pet> pets =
+  private static final List<Pet> FALLBACK_PETS =
       List.of(
           new Pet(
               "Buddy",
@@ -29,11 +34,45 @@ public class PetRepository {
               "Clover", "rabbit", "Mini Rex", 1, "Gentle and quiet.", "/images/pets/clover.jpg"),
           new Pet("Sunny", "bird", "Cockatiel", 5, "Social and chatty.", "/images/pets/sunny.jpg"));
 
-  public List<Pet> findAll() {
-    return pets;
+  private final PetJpaRepository petJpaRepository;
+
+  /** No-arg constructor used directly in unit tests (no Spring context). */
+  public PetRepository() {
+    this.petJpaRepository = null;
   }
 
+  /** Spring-managed constructor: uses DB-backed JPA repository with hardcoded fallback. */
+  @Autowired
+  public PetRepository(PetJpaRepository petJpaRepository) {
+    this.petJpaRepository = petJpaRepository;
+  }
+
+  /**
+   * Returns all pets, using the database when available or the fallback list otherwise.
+   *
+   * @return non-null list of all pets
+   */
+  public List<Pet> findAll() {
+    if (petJpaRepository == null) {
+      return FALLBACK_PETS;
+    }
+    List<Pet> dbPets = petJpaRepository.findAll();
+    return dbPets.isEmpty() ? FALLBACK_PETS : dbPets;
+  }
+
+  /**
+   * Returns pets matching the given type, using the database when available.
+   *
+   * @param type the pet species to filter by (case-insensitive)
+   * @return non-null list of matching pets
+   */
   public List<Pet> findByType(String type) {
-    return pets.stream().filter((pet) -> pet.getType().equalsIgnoreCase(type)).toList();
+    if (petJpaRepository == null) {
+      return FALLBACK_PETS.stream().filter(pet -> pet.getType().equalsIgnoreCase(type)).toList();
+    }
+    List<Pet> dbPets = petJpaRepository.findByTypeIgnoreCase(type);
+    return dbPets.isEmpty()
+        ? FALLBACK_PETS.stream().filter(pet -> pet.getType().equalsIgnoreCase(type)).toList()
+        : dbPets;
   }
 }

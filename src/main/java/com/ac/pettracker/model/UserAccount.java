@@ -9,6 +9,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
+/** JPA entity representing a registered user account stored in the {@code user_accounts} table. */
 @Entity
 @Table(name = "user_accounts")
 public class UserAccount {
@@ -26,9 +27,8 @@ public class UserAccount {
   @Column(nullable = false)
   private LocalDateTime createdAt;
 
-  protected UserAccount() {
-    // JPA constructor
-  }
+  /** No-arg constructor required by JPA. */
+  protected UserAccount() {}
 
   public UserAccount(String email, String passwordHash) {
     this.email = email;

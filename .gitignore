@@ -16,3 +16,6 @@
 
 #api keys
 src/main/resources/application-local.properties
+
+# local mysql env overrides
+.env.mysql

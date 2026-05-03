@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Token Bucket Rate Limiter
+ * Token Bucket Rate Limiter.
  *
  * <p>This implements the Token Bucket algorithm for rate limiting:
  *
@@ -25,7 +25,7 @@ public class TokenBucket {
   private long lastRefillTime;
 
   /**
-   * Create a token bucket
+   * Creates a token bucket.
    *
    * @param capacity max tokens in bucket (e.g., 3)
    * @param refillRateMs milliseconds between refills (e.g., 1000 = 1 token per second)
@@ -57,7 +57,7 @@ public class TokenBucket {
     return waitMs;
   }
 
-  /** Refill tokens based on elapsed time since last refill */
+  /** Refills tokens based on elapsed time since the last refill. */
   private void refill() {
     long now = System.currentTimeMillis();
     long elapsedMs = now - lastRefillTime;

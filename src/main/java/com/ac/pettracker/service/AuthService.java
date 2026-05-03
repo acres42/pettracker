@@ -7,6 +7,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/** Service handling user registration, authentication, and password management. */
 @Service
 public class AuthService {
 
@@ -17,6 +18,14 @@ public class AuthService {
     this.userAccountRepository = userAccountRepository;
   }
 
+  /**
+   * Registers a new user account with the given email and password.
+   *
+   * @param email the user's email address (normalized to lowercase, trimmed)
+   * @param rawPassword the plain-text password (minimum 8 characters)
+   * @return {@code true} if registration succeeded; {@code false} if validation failed or the email
+   *     is already in use
+   */
   public boolean register(String email, String rawPassword) {
     String normalizedEmail = normalizeEmail(email);
     if (normalizedEmail == null || rawPassword == null || rawPassword.length() < 8) {
@@ -31,6 +40,14 @@ public class AuthService {
     return true;
   }
 
+  /**
+   * Authenticates a user by verifying the given password against the stored hash.
+   *
+   * @param email the user's email address
+   * @param rawPassword the plain-text password to verify
+   * @return an {@link java.util.Optional} containing the account if credentials are valid, or empty
+   *     if authentication fails
+   */
   public Optional<UserAccount> authenticate(String email, String rawPassword) {
     String normalizedEmail = normalizeEmail(email);
     if (normalizedEmail == null || rawPassword == null) {
@@ -42,6 +59,15 @@ public class AuthService {
         .filter(user -> passwordEncoder.matches(rawPassword, user.getPasswordHash()));
   }
 
+  /**
+   * Updates the password for the authenticated user.
+   *
+   * @param email the user's email address
+   * @param currentRawPassword the current plain-text password (used to verify identity)
+   * @param newRawPassword the new plain-text password (minimum 8 characters)
+   * @return {@code true} if the password was updated; {@code false} if validation or authentication
+   *     failed
+   */
   public boolean updatePassword(String email, String currentRawPassword, String newRawPassword) {
     String normalizedEmail = normalizeEmail(email);
     if (normalizedEmail == null

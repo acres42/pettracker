@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+/** MVC controller handling all page routes, form submissions, and session-based pet tracking. */
 @Controller
 public class PageController {
 
@@ -32,16 +33,26 @@ public class PageController {
     this.authService = authService;
   }
 
+  /** Renders the home (landing) page. */
   @GetMapping("/")
   public String home() {
     return "index";
   }
 
+  /** Renders the sign-up page. */
   @GetMapping("/signup")
   public String signup() {
     return "signup";
   }
 
+  /**
+   * Renders the pet search form, redirecting to home if the user is not authenticated.
+   *
+   * @param query optional pre-filled search query
+   * @param model the Spring MVC model
+   * @param session the current HTTP session
+   * @return the {@code search} view, or a redirect to {@code /}
+   */
   @GetMapping("/search")
   public String search(
       @RequestParam(name = "q", required = false) String query, Model model, HttpSession session) {
@@ -52,6 +63,15 @@ public class PageController {
     return "search";
   }
 
+  /**
+   * Performs a pet search and renders the results page.
+   *
+   * @param type the pet species to search for
+   * @param location the location to search in
+   * @param model the Spring MVC model
+   * @param session the current HTTP session
+   * @return the {@code results} view, or a redirect to {@code /}
+   */
   @GetMapping("/pets/results")
   public String results(
       @RequestParam(required = false) String type,
@@ -75,6 +95,15 @@ public class PageController {
     return "results";
   }
 
+  /**
+   * Renders the saved-pets dashboard with optional sorting.
+   *
+   * @param sort the field to sort by (default: {@code savedAt})
+   * @param dir the sort direction — {@code asc} or {@code desc} (default: {@code desc})
+   * @param model the Spring MVC model
+   * @param session the current HTTP session
+   * @return the {@code dashboard} view, or a redirect to {@code /}
+   */
   @GetMapping("/dashboard")
   public String dashboard(
       @RequestParam(defaultValue = "savedAt") String sort,
@@ -93,6 +122,13 @@ public class PageController {
     return "dashboard";
   }
 
+  /**
+   * Renders the user profile page pre-filled with session data.
+   *
+   * @param model the Spring MVC model
+   * @param session the current HTTP session
+   * @return the {@code profile} view, or a redirect to {@code /}
+   */
   @GetMapping("/profile")
   public String profile(Model model, HttpSession session) {
     if (!isAuthenticated(session)) {
@@ -108,6 +144,14 @@ public class PageController {
     return "profile";
   }
 
+  /**
+   * Handles user registration and, on success, establishes a session.
+   *
+   * @param email the new user's email address
+   * @param password the new user's plain-text password
+   * @param session the current HTTP session
+   * @return a redirect to the search page on success, or {@code /?authError=register} on failure
+   */
   @PostMapping("/auth/register")
   public String register(
       @RequestParam String email, @RequestParam String password, HttpSession session) {
@@ -118,12 +162,30 @@ public class PageController {
     return establishSessionAndRedirect(email, password, session);
   }
 
+  /**
+   * Handles user login and establishes a session on success.
+   *
+   * @param email the user's email address
+   * @param password the user's plain-text password
+   * @param session the current HTTP session
+   * @return a redirect to the search page on success, or home on failure
+   */
   @PostMapping("/auth/login")
   public String login(
       @RequestParam String email, @RequestParam String password, HttpSession session) {
     return establishSessionAndRedirect(email, password, session);
   }
 
+  /**
+   * Handles profile preference updates submitted via the {@code /profile} form.
+   *
+   * @param species preferred pet species
+   * @param weight preferred weight range
+   * @param breed preferred breed
+   * @param keywords search keywords
+   * @param session the current HTTP session
+   * @return a redirect to {@code /profile}
+   */
   @PostMapping("/profile")
   public String updateProfile(
       @RequestParam(defaultValue = "") String species,
@@ -134,6 +196,16 @@ public class PageController {
     return updateProfilePreferences(species, weight, breed, keywords, session);
   }
 
+  /**
+   * Handles profile preference updates submitted via the {@code /profile/preferences} form.
+   *
+   * @param species preferred pet species
+   * @param weight preferred weight range
+   * @param breed preferred breed
+   * @param keywords search keywords
+   * @param session the current HTTP session
+   * @return a redirect to {@code /profile}, or {@code /} if not authenticated
+   */
   @PostMapping("/profile/preferences")
   public String updateProfilePreferences(
       @RequestParam(defaultValue = "") String species,
@@ -151,6 +223,15 @@ public class PageController {
     return "redirect:/profile";
   }
 
+  /**
+   * Handles password change requests.
+   *
+   * @param currentPassword the user's current plain-text password
+   * @param newPassword the desired new password
+   * @param confirmPassword must match {@code newPassword}
+   * @param session the current HTTP session
+   * @return a redirect to {@code /profile?passwordUpdated=1} on success, or an error redirect
+   */
   @PostMapping("/profile/password")
   public String updatePassword(
       @RequestParam(defaultValue = "") String currentPassword,
@@ -171,12 +252,31 @@ public class PageController {
     return "redirect:/profile?passwordUpdated=1";
   }
 
+  /**
+   * Invalidates the current session and redirects to the home page.
+   *
+   * @param session the current HTTP session
+   * @return a redirect to {@code /}
+   */
   @GetMapping("/logout")
   public String logout(HttpSession session) {
     session.invalidate();
     return "redirect:/";
   }
 
+  /**
+   * Saves a pet to the user's dashboard if it has not already been saved.
+   *
+   * @param name pet name
+   * @param type pet species
+   * @param breed pet breed
+   * @param age pet age in years
+   * @param description pet description
+   * @param imageUrl pet image URL
+   * @param notes initial user notes
+   * @param session the current HTTP session
+   * @return a redirect to {@code /dashboard}
+   */
   @PostMapping("/dashboard/save")
   public String savePetToDashboard(
       @RequestParam String name,
@@ -211,6 +311,15 @@ public class PageController {
     return "redirect:/dashboard";
   }
 
+  /**
+   * Updates the notes and status of a saved pet entry.
+   *
+   * @param id the UUID of the saved pet entry
+   * @param notes updated notes text
+   * @param status updated adoption status
+   * @param session the current HTTP session
+   * @return a redirect to {@code /dashboard}
+   */
   @PostMapping("/dashboard/update")
   public String updateSavedPet(
       @RequestParam String id,
@@ -231,6 +340,13 @@ public class PageController {
     return "redirect:/dashboard";
   }
 
+  /**
+   * Removes a saved pet entry from the dashboard.
+   *
+   * @param id the UUID of the saved pet entry to remove
+   * @param session the current HTTP session
+   * @return a redirect to {@code /dashboard}
+   */
   @PostMapping("/dashboard/delete")
   public String deleteSavedPet(@RequestParam String id, HttpSession session) {
     if (!isAuthenticated(session)) {
@@ -253,6 +369,7 @@ public class PageController {
     return savedPets;
   }
 
+  @SuppressWarnings("checkstyle:Indentation")
   private Comparator<SavedPetEntry> buildComparator(String sort, String dir) {
     Comparator<SavedPetEntry> comparator =
         switch (sort) {
