@@ -42,16 +42,6 @@ public class Pet {
   /** No-arg constructor required by JPA. */
   protected Pet() {}
 
-  public Pet(
-      String name, String type, String breed, Integer age, String description, String imageUrl) {
-    this.name = name;
-    this.type = type;
-    this.breed = breed;
-    this.age = age;
-    this.description = description;
-    this.imageUrl = imageUrl;
-  }
-
   /** Full constructor including gender and weight. */
   public Pet(
       String name,
@@ -62,7 +52,12 @@ public class Pet {
       String imageUrl,
       String gender,
       Integer weightLbs) {
-    this(name, type, breed, age, description, imageUrl);
+    this.name = name;
+    this.type = type;
+    this.breed = breed;
+    this.age = age;
+    this.description = description;
+    this.imageUrl = imageUrl;
     this.gender = gender;
     this.weightLbs = weightLbs;
   }

@@ -20,6 +20,7 @@ public final class PetMapper {
         pet.getBreed(),
         pet.getAge(),
         pet.getDescription(),
-        pet.getImageUrl());
+        pet.getImageUrl(),
+        pet.getGender());
   }
 }

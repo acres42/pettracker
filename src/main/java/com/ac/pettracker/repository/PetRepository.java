@@ -20,19 +20,45 @@ public class PetRepository {
               "Golden Retriever",
               4,
               "Friendly and loyal.",
-              "/images/pets/buddy.jpg"),
+              "/images/pets/buddy.jpg",
+              "male",
+              null),
           new Pet(
               "Mittens",
               "cat",
               "Domestic Shorthair",
               2,
               "Curious and affectionate.",
-              "/images/pets/mittens.jpg"),
+              "/images/pets/mittens.jpg",
+              "female",
+              null),
           new Pet(
-              "Daisy", "dog", "Beagle", 3, "Playful and food-motivated.", "/images/pets/daisy.jpg"),
+              "Daisy",
+              "dog",
+              "Beagle",
+              3,
+              "Playful and food-motivated.",
+              "/images/pets/daisy.jpg",
+              "female",
+              null),
           new Pet(
-              "Clover", "rabbit", "Mini Rex", 1, "Gentle and quiet.", "/images/pets/clover.jpg"),
-          new Pet("Sunny", "bird", "Cockatiel", 5, "Social and chatty.", "/images/pets/sunny.jpg"));
+              "Clover",
+              "rabbit",
+              "Mini Rex",
+              1,
+              "Gentle and quiet.",
+              "/images/pets/clover.jpg",
+              "female",
+              null),
+          new Pet(
+              "Sunny",
+              "bird",
+              "Cockatiel",
+              5,
+              "Social and chatty.",
+              "/images/pets/sunny.jpg",
+              "male",
+              null));
 
   private final PetJpaRepository petJpaRepository;
 

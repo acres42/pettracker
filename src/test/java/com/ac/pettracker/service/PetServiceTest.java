@@ -88,7 +88,8 @@ class PetServiceTest {
           @Override
           public List<Pet> fetchPets(String type, String location) {
             return List.of(
-                new Pet("Rex", "dog", "Husky", 3, "Energetic and social", "https://image"));
+                new Pet(
+                    "Rex", "dog", "Husky", 3, "Energetic and social", "https://image", null, null));
           }
         };
     PetService apiBackedService = new PetService(apiClient, petRepository);

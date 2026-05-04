@@ -191,7 +191,15 @@ public class RescueGroupsClientTokenBucket {
       String breed = findBreed(animal, included);
       String imageUrl = findImageUrl(animal, included);
       pets.add(
-          new Pet(name, type.toLowerCase(), breed, mapAgeBucket(ageGroup), description, imageUrl));
+          new Pet(
+              name,
+              type.toLowerCase(),
+              breed,
+              mapAgeBucket(ageGroup),
+              description,
+              imageUrl,
+              null,
+              null));
     }
     return pets;
   }

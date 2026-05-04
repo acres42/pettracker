@@ -109,7 +109,9 @@ class PageControllerTest {
                     "Golden Retriever",
                     4,
                     "Friendly dog",
-                    "/images/pets/buddy.jpg")));
+                    "/images/pets/buddy.jpg",
+                    null,
+                    null)));
 
     mockMvc
         .perform(
@@ -142,8 +144,18 @@ class PageControllerTest {
                     "Golden Retriever",
                     4,
                     "Friendly dog",
-                    "/images/pets/buddy.jpg"),
-                new Pet("Milo", "dog", "Beagle", 2, "Curious dog", "/images/pets/milo.jpg")));
+                    "/images/pets/buddy.jpg",
+                    null,
+                    null),
+                new Pet(
+                    "Milo",
+                    "dog",
+                    "Beagle",
+                    2,
+                    "Curious dog",
+                    "/images/pets/milo.jpg",
+                    null,
+                    null)));
 
     MockHttpSession session = new MockHttpSession();
     session.setAttribute("authUserId", 1L);
@@ -231,7 +243,9 @@ class PageControllerTest {
                     "Golden Retriever",
                     4,
                     "Friendly dog",
-                    "/images/pets/buddy.jpg")));
+                    "/images/pets/buddy.jpg",
+                    null,
+                    null)));
 
     mockMvc
         .perform(
@@ -248,7 +262,9 @@ class PageControllerTest {
   @Test
   void searchResultsPageRendersFallbackWhenImageUrlIsMissing() throws Exception {
     when(petService.searchPets("dog", "46201"))
-        .thenReturn(List.of(new Pet("Buddy", "dog", "Golden Retriever", 4, "Friendly dog", "")));
+        .thenReturn(
+            List.of(
+                new Pet("Buddy", "dog", "Golden Retriever", 4, "Friendly dog", "", null, null)));
 
     mockMvc
         .perform(
@@ -681,7 +697,7 @@ class PageControllerTest {
 
   @Test
   void searchPageShowsSuggestedPetNamesWhenPreferencesSet() throws Exception {
-    Pet rex = new Pet("Rex", "dog", "Husky", 3, "Energetic and social", "/img/rex.jpg");
+    Pet rex = new Pet("Rex", "dog", "Husky", 3, "Energetic and social", "/img/rex.jpg", null, null);
     given(petService.getSuggestedPets("dog", "male", "", "", "", Set.of()))
         .willReturn(List.of(rex));
 

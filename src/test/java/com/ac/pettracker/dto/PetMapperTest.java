@@ -11,7 +11,14 @@ class PetMapperTest {
   void mapsPetToPetDto() {
     Pet pet =
         new Pet(
-            "Buddy", "dog", "Golden Retriever", 4, "Friendly and loyal.", "/images/pets/buddy.jpg");
+            "Buddy",
+            "dog",
+            "Golden Retriever",
+            4,
+            "Friendly and loyal.",
+            "/images/pets/buddy.jpg",
+            "male",
+            null);
 
     PetDto dto = PetMapper.toDto(pet);
 
@@ -21,5 +28,6 @@ class PetMapperTest {
     assertEquals(4, dto.age());
     assertEquals("Friendly and loyal.", dto.description());
     assertEquals("/images/pets/buddy.jpg", dto.imageUrl());
+    assertEquals("male", dto.gender());
   }
 }
