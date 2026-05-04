@@ -2,6 +2,7 @@ package com.ac.pettracker.service;
 
 import com.ac.pettracker.integration.RescueGroupsClient;
 import com.ac.pettracker.model.Pet;
+import com.ac.pettracker.model.PetKeys;
 import com.ac.pettracker.repository.PetRepository;
 import java.util.Arrays;
 import java.util.List;
@@ -83,6 +84,9 @@ public class PetService {
    * @return a sub-list of pets for the requested page; empty if {@code page} is out of range
    */
   public List<Pet> searchPets(String type, String location, String sort, int page, int size) {
+    if (page < 0 || size <= 0 || size > 500) {
+      throw new IllegalArgumentException("Invalid pagination parameters");
+    }
     logger.info("Paginating pets with page={} size={}", page, size);
     List<Pet> results = searchPets(type, location, sort);
 
@@ -126,7 +130,14 @@ public class PetService {
         .filter(pet -> matchesWeightBand(pet, weightBand))
         .filter(pet -> matchesBreed(pet, breed))
         .filter(pet -> matchesKeywords(pet, keywords))
-        .filter(pet -> !savedPetKeys.contains(buildPetKey(pet)))
+        .filter(
+            pet ->
+                !savedPetKeys.contains(
+                    PetKeys.of(
+                        pet.getName(),
+                        pet.getType(),
+                        pet.getBreed(),
+                        pet.getAge() != null ? pet.getAge() : 0)))
         .toList();
   }
 
@@ -179,14 +190,5 @@ public class PetService {
         .map(String::trim)
         .filter(kw -> !kw.isBlank())
         .anyMatch(kw -> haystack.contains(kw.toLowerCase()));
-  }
-
-  private String buildPetKey(Pet pet) {
-    return String.join(
-        "|",
-        pet.getName() != null ? pet.getName() : "",
-        pet.getType() != null ? pet.getType() : "",
-        pet.getBreed() != null ? pet.getBreed() : "",
-        String.valueOf(pet.getAge() != null ? pet.getAge() : 0));
   }
 }

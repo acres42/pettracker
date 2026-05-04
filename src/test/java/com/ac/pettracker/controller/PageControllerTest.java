@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -32,7 +33,12 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-@WebMvcTest(PageController.class)
+@WebMvcTest({
+  AuthController.class,
+  ProfileController.class,
+  DashboardController.class,
+  SearchController.class
+})
 class PageControllerTest {
 
   @Autowired private MockMvc mockMvc;
@@ -161,6 +167,7 @@ class PageControllerTest {
     mockMvc
         .perform(
             post("/dashboard/save")
+                .with(csrf())
                 .session(session)
                 .param("name", "Buddy")
                 .param("type", "dog")
@@ -261,7 +268,10 @@ class PageControllerTest {
 
     mockMvc
         .perform(
-            post("/auth/login").param("email", "user@example.com").param("password", "password123"))
+            post("/auth/login")
+                .with(csrf())
+                .param("email", "user@example.com")
+                .param("password", "password123"))
         .andExpect(status().is3xxRedirection())
         .andExpect(redirectedUrl("/search"));
   }
@@ -275,6 +285,7 @@ class PageControllerTest {
     mockMvc
         .perform(
             post("/auth/register")
+                .with(csrf())
                 .param("email", "new@example.com")
                 .param("password", "password123"))
         .andExpect(status().is3xxRedirection())
@@ -312,6 +323,7 @@ class PageControllerTest {
         mockMvc
             .perform(
                 post("/profile/preferences")
+                    .with(csrf())
                     .session(authenticatedSession())
                     .param("species", "dog")
                     .param("weight", "25-50lbs")
@@ -326,6 +338,7 @@ class PageControllerTest {
     mockMvc
         .perform(
             post("/dashboard/save")
+                .with(csrf())
                 .session(session)
                 .param("name", "Buddy")
                 .param("type", "dog")
@@ -352,6 +365,7 @@ class PageControllerTest {
     mockMvc
         .perform(
             post("/profile/password")
+                .with(csrf())
                 .session(authenticatedSession())
                 .param("currentPassword", "old-password")
                 .param("newPassword", "new-password123")
@@ -365,6 +379,7 @@ class PageControllerTest {
     mockMvc
         .perform(
             post("/profile/password")
+                .with(csrf())
                 .session(authenticatedSession())
                 .param("currentPassword", "old-password")
                 .param("newPassword", "new-password123")
@@ -387,6 +402,7 @@ class PageControllerTest {
         mockMvc
             .perform(
                 post("/dashboard/save")
+                    .with(csrf())
                     .session(authenticatedSession())
                     .param("name", "Buddy")
                     .param("type", "dog")
@@ -437,6 +453,7 @@ class PageControllerTest {
         mockMvc
             .perform(
                 post("/dashboard/save")
+                    .with(csrf())
                     .session(authenticatedSession())
                     .param("name", "Buddy")
                     .param("type", "dog")
@@ -468,6 +485,7 @@ class PageControllerTest {
         mockMvc
             .perform(
                 post("/dashboard/save")
+                    .with(csrf())
                     .session(authenticatedSession())
                     .param("name", "Milo")
                     .param("type", "cat")
@@ -498,6 +516,7 @@ class PageControllerTest {
         mockMvc
             .perform(
                 post("/dashboard/save")
+                    .with(csrf())
                     .session(authenticatedSession())
                     .param("name", "Buddy")
                     .param("type", "dog")
@@ -525,6 +544,7 @@ class PageControllerTest {
         mockMvc
             .perform(
                 post("/dashboard/save")
+                    .with(csrf())
                     .session(authenticatedSession())
                     .param("name", "Buddy")
                     .param("type", "dog")
@@ -546,7 +566,7 @@ class PageControllerTest {
             idStart + idPrefix.length(), htmlBefore.indexOf('"', idStart + idPrefix.length()));
 
     mockMvc
-        .perform(post("/dashboard/delete").session(session).param("id", id))
+        .perform(post("/dashboard/delete").with(csrf()).session(session).param("id", id))
         .andExpect(status().is3xxRedirection())
         .andExpect(redirectedUrl("/dashboard"));
 
@@ -562,6 +582,7 @@ class PageControllerTest {
         mockMvc
             .perform(
                 post("/dashboard/save")
+                    .with(csrf())
                     .session(authenticatedSession())
                     .param("name", "Zoe")
                     .param("type", "dog")
@@ -577,6 +598,7 @@ class PageControllerTest {
     mockMvc
         .perform(
             post("/dashboard/save")
+                .with(csrf())
                 .session(session)
                 .param("name", "Amy")
                 .param("type", "dog")
@@ -613,6 +635,7 @@ class PageControllerTest {
     mockMvc
         .perform(
             post("/profile/preferences")
+                .with(csrf())
                 .session(authenticatedSession())
                 .param("species", "dog")
                 .param("gender", "male")

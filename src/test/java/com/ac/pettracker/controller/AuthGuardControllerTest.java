@@ -1,5 +1,6 @@
 package com.ac.pettracker.controller;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -14,7 +15,12 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(PageController.class)
+@WebMvcTest({
+  AuthController.class,
+  ProfileController.class,
+  DashboardController.class,
+  SearchController.class
+})
 class AuthGuardControllerTest {
 
   @Autowired private MockMvc mockMvc;
@@ -58,23 +64,11 @@ class AuthGuardControllerTest {
   }
 
   @Test
-  void unauthenticatedProfileUpdateRedirectsHome() throws Exception {
-    mockMvc
-        .perform(
-            post("/profile")
-                .param("species", "dog")
-                .param("weight", "25-50lbs")
-                .param("breed", "beagle")
-                .param("keywords", "calm"))
-        .andExpect(status().is3xxRedirection())
-        .andExpect(redirectedUrl("/"));
-  }
-
-  @Test
   void unauthenticatedProfilePreferencesUpdateRedirectsHome() throws Exception {
     mockMvc
         .perform(
             post("/profile/preferences")
+                .with(csrf())
                 .param("species", "dog")
                 .param("weight", "25-50lbs")
                 .param("breed", "beagle")
@@ -88,6 +82,7 @@ class AuthGuardControllerTest {
     mockMvc
         .perform(
             post("/profile/password")
+                .with(csrf())
                 .param("currentPassword", "old-password")
                 .param("newPassword", "new-password123")
                 .param("confirmPassword", "new-password123"))
@@ -100,6 +95,7 @@ class AuthGuardControllerTest {
     mockMvc
         .perform(
             post("/dashboard/save")
+                .with(csrf())
                 .param("name", "Buddy")
                 .param("type", "dog")
                 .param("breed", "Golden Retriever")
@@ -115,6 +111,7 @@ class AuthGuardControllerTest {
     mockMvc
         .perform(
             post("/dashboard/update")
+                .with(csrf())
                 .param("id", "abc-123")
                 .param("notes", "check")
                 .param("status", "INTRODUCED"))
@@ -125,7 +122,7 @@ class AuthGuardControllerTest {
   @Test
   void unauthenticatedDeleteRedirectsHome() throws Exception {
     mockMvc
-        .perform(post("/dashboard/delete").param("id", "abc-123"))
+        .perform(post("/dashboard/delete").with(csrf()).param("id", "abc-123"))
         .andExpect(status().is3xxRedirection())
         .andExpect(redirectedUrl("/"));
   }

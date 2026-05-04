@@ -78,7 +78,7 @@
             <td data-label="Actions">
               <div class="action-buttons">
                 <form class="inline-update-form" th:attr="id=${'update-form-' + pet.id}" method="post"
-                  action="/dashboard/update">
+                  th:action="@{/dashboard/update}">
                   <input type="hidden" name="id" th:value="${pet.id}" />
                   <button class="action-button action-update" type="submit" aria-label="Update saved pet">
                     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -87,7 +87,7 @@
                     <span>Update</span>
                   </button>
                 </form>
-                <form class="inline-delete-form" method="post" action="/dashboard/delete">
+                <form class="inline-delete-form" method="post" th:action="@{/dashboard/delete}">
                   <input type="hidden" name="id" th:value="${pet.id}" />
                   <button class="action-button action-delete" type="submit" aria-label="Delete saved pet">
                     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">

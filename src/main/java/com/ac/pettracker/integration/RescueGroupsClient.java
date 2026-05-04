@@ -79,8 +79,6 @@ public class RescueGroupsClient {
       return List.of();
     }
 
-    HttpServerErrorException lastTransientError = null;
-
     for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
         String species = toSpeciesView(type);
@@ -111,7 +109,6 @@ public class RescueGroupsClient {
         return parseAnimals(responseBody, type);
 
       } catch (HttpServerErrorException e) {
-        lastTransientError = e;
         if (attempt < MAX_RETRIES) {
           long backoffMs = exponentialBackoffWithJitter(attempt);
           logger.warn(
@@ -239,14 +236,28 @@ public class RescueGroupsClient {
               && picId.equals(inc.path("id").asText())) {
             String url = inc.path("attributes").path("urlSmall").asText("");
             if (!url.isBlank()) {
-              return url;
+              return validateImageUrl(url);
             }
-            return inc.path("attributes").path("url").asText("");
+            return validateImageUrl(inc.path("attributes").path("url").asText(""));
           }
         }
       }
     }
     return "";
+  }
+
+  /**
+   * Returns the URL if it begins with {@code https://}, otherwise returns an empty string. This
+   * prevents {@code javascript:} and {@code data:} URIs from being stored or rendered.
+   *
+   * @param url the candidate image URL
+   * @return the URL unchanged if it is HTTPS, or {@code ""} if not
+   */
+  private String validateImageUrl(String url) {
+    if (url == null || !url.startsWith("https://")) {
+      return "";
+    }
+    return url;
   }
 
   private int mapAgeBucket(String ageGroup) {

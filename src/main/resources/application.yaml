@@ -9,9 +9,6 @@ spring:
     hibernate:
       ddl-auto: update
     open-in-view: false
-  h2:
-    console:
-      enabled: true
   flyway:
     enabled: false
 
@@ -31,4 +28,4 @@ rescuegroups:
 
 logging:
   level:
-    com.ac.pettracker.integration.RescueGroupsClient: DEBUG
+    "[com.ac.pettracker.integration.RescueGroupsClient]": DEBUG

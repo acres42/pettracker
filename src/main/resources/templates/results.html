@@ -69,7 +69,7 @@
         <p class="pet-type" th:text="${pet.type}">dog</p>
         <p th:text="${pet.description}">Friendly dog</p>
 
-        <form class="save-form" method="post" action="/dashboard/save">
+        <form class="save-form" method="post" th:action="@{/dashboard/save}">
           <input type="hidden" name="name" th:value="${pet.name}" />
           <input type="hidden" name="type" th:value="${pet.type}" />
           <input type="hidden" name="breed" th:value="${pet.breed}" />

@@ -59,7 +59,7 @@
 
     <section class="profile-card">
       <h2>Update Password</h2>
-      <form class="search-bar" method="post" action="/profile/password">
+      <form class="search-bar" method="post" th:action="@{/profile/password}">
         <label>
           <span>Current Password</span>
           <input type="password" name="currentPassword" autocomplete="current-password" required />
@@ -78,7 +78,7 @@
 
     <section class="profile-card">
       <h2>Pets You May Like</h2>
-      <form class="search-bar" method="post" action="/profile/preferences">
+      <form class="search-bar" method="post" th:action="@{/profile/preferences}">
         <label>
           <span>Species</span>
           <select name="species">

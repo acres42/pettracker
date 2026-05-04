@@ -4,6 +4,8 @@
   "editor.insertSpaces": true,
   "editor.tabSize": 2,
   "editor.detectIndentation": false,
-  "editor.formatOnSave": true
-
+  "editor.formatOnSave": true,
+  "files.associations": {
+    "**/db/migration/mysql/*.sql": "mysql"
+  }
 }

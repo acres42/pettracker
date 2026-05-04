@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
   <meta charset="UTF-8" />
@@ -37,7 +37,7 @@
     <p>
       Create your account and start building your saved pet dashboard.
     </p>
-    <form class="search-bar" method="post" action="/auth/register">
+    <form class="search-bar" method="post" th:action="@{/auth/register}">
       <label>
         <span>
           Email
