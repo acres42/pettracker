@@ -51,8 +51,7 @@ public class PetService {
    *
    * @param type the pet species
    * @param location the search location string
-   * @param sort the field to sort by: {@code "name"} or {@code "type"}; any other value preserves
-   *     the original order
+   * @param sort the field to sort by: {@code "name"}; any other value preserves the original order
    * @return sorted, non-null list of matching pets
    */
   public List<Pet> searchPets(String type, String location, String sort) {
@@ -61,12 +60,6 @@ public class PetService {
     if ("name".equalsIgnoreCase(sort)) {
       return results.stream()
           .sorted((first, second) -> first.getName().compareToIgnoreCase(second.getName()))
-          .toList();
-    }
-
-    if ("type".equalsIgnoreCase(sort)) {
-      return results.stream()
-          .sorted((first, second) -> first.getType().compareToIgnoreCase(second.getType()))
           .toList();
     }
 
