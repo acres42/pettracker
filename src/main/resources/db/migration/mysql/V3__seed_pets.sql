@@ -12,7 +12,7 @@ INSERT INTO pets (name, type, breed, age, weight_lbs, description, image_url) VA
 ('Zeus',     'dog', 'Border Collie',      2,  42,  'Energetic and always ready to play.',          '/images/pets/default.jpg'),
 ('Bella',    'dog', 'Golden Retriever',   1,  58,  'Friendly with kids and other pets.',           '/images/pets/default.jpg'),
 ('Luna',     'dog', 'Labrador',           3,  68,  'Loves long walks and belly rubs.',             '/images/pets/default.jpg'),
-('Daisy',    'dog', 'Beagle',             4,  20,  'Playful and food-motivated.',                  '/images/pets/daisy.jpg'),
+('Daisy',    'dog', 'Beagle',             4,  20,  'Playful and food-motivated.',                  '/images/pets/default.jpg'),
 ('Molly',    'dog', 'Corgi',              2,  28,  'Sweet-natured and easy to train.',             '/images/pets/default.jpg'),
 ('Sadie',    'dog', 'Pug',               6,  18,  'Calm and gentle, great for apartment life.',   '/images/pets/default.jpg'),
 ('Maggie',   'dog', 'Dachshund',          3,  11,  'Curious explorer who loves attention.',        '/images/pets/default.jpg'),
@@ -37,7 +37,7 @@ INSERT INTO pets (name, type, breed, age, weight_lbs, description, image_url) VA
 ('Bruno',    'dog', 'German Shepherd',    5,  88,  'Calm and gentle, great for apartment life.',   '/images/pets/default.jpg'),
 
 -- Cats (30)
-('Mittens',  'cat', 'Domestic Shorthair', 2,   8,  'Curious and affectionate.',                    '/images/pets/mittens.jpg'),
+('Mittens',  'cat', 'Domestic Shorthair', 2,   8,  'Curious and affectionate.',                    '/images/pets/default.jpg'),
 ('Oliver',   'cat', 'Siamese',            4,   9,  'Independent but very affectionate.',           '/images/pets/default.jpg'),
 ('Mochi',    'cat', 'Persian',            3,  10,  'Calm and gentle, great for apartment life.',   '/images/pets/default.jpg'),
 ('Salem',    'cat', 'Domestic Shorthair', 6,   9,  'Quiet and observant, loves a cozy spot.',      '/images/pets/default.jpg'),
@@ -86,7 +86,7 @@ INSERT INTO pets (name, type, breed, age, weight_lbs, description, image_url) VA
 ('Cotton',      'rabbit', 'Mini Rex',          1,   3,  'Playful and mischievous.',                      '/images/pets/default.jpg'),
 
 -- Birds (12)
-('Sunny',     'bird', 'Cockatiel',    5,   1,  'Social and chatty.',                            '/images/pets/sunny.jpg'),
+('Sunny',     'bird', 'Cockatiel',    5,   1,  'Social and chatty.',                            '/images/pets/default.jpg'),
 ('Kiwi',      'bird', 'Parakeet',     3,   1,  'Energetic and always ready to play.',           '/images/pets/default.jpg'),
 ('Mango',     'bird', 'Lovebird',     4,   1,  'Friendly with kids and other pets.',            '/images/pets/default.jpg'),
 ('Rio',       'bird', 'Conure',       2,   2,  'Independent but very affectionate.',            '/images/pets/default.jpg'),

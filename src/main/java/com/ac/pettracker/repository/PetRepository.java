@@ -20,7 +20,7 @@ public class PetRepository {
               "Golden Retriever",
               4,
               "Friendly and loyal.",
-              "/images/pets/buddy.jpg",
+              "/images/pets/default.jpg",
               "male",
               null),
           new Pet(
@@ -29,7 +29,7 @@ public class PetRepository {
               "Domestic Shorthair",
               2,
               "Curious and affectionate.",
-              "/images/pets/mittens.jpg",
+              "/images/pets/default.jpg",
               "female",
               null),
           new Pet(
@@ -38,7 +38,7 @@ public class PetRepository {
               "Beagle",
               3,
               "Playful and food-motivated.",
-              "/images/pets/daisy.jpg",
+              "/images/pets/default.jpg",
               "female",
               null),
           new Pet(
@@ -56,7 +56,7 @@ public class PetRepository {
               "Cockatiel",
               5,
               "Social and chatty.",
-              "/images/pets/sunny.jpg",
+              "/images/pets/default.jpg",
               "male",
               null));
 
