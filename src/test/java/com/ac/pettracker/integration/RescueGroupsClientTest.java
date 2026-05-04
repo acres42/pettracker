@@ -25,7 +25,10 @@ class RescueGroupsClientTest {
     String baseUrl = "http://localhost:" + server.getAddress().getPort();
     RescueGroupsClient client =
         new RescueGroupsClient(
-            RestClient.builder().baseUrl(baseUrl).build(), new ObjectMapper(), "test-api-key");
+            RestClient.builder().baseUrl(baseUrl).build(),
+            new ObjectMapper(),
+            "test-api-key",
+            1000L);
 
     try {
       List<Pet> pets = client.fetchPets("dog", "46201");
@@ -45,7 +48,7 @@ class RescueGroupsClientTest {
   @Test
   void fetchPetsReturnsEmptyWhenApiKeyIsMissing() {
     RescueGroupsClient client =
-        new RescueGroupsClient(RestClient.builder().build(), new ObjectMapper(), "");
+        new RescueGroupsClient(RestClient.builder().build(), new ObjectMapper(), "", 1000L);
 
     List<Pet> pets = client.fetchPets("dog", "46201");
 

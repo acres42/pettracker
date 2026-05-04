@@ -91,8 +91,11 @@ class RescueGroupsClientRetryTest {
       // Act: Create client with fast backoff (10ms) for testing
       RestClient restClient = RestClient.builder().baseUrl("http://localhost:" + port).build();
       RescueGroupsClient client =
-          new RescueGroupsClient(
-              restClient, objectMapper, "test-key", 10L); // 10ms backoff for fast tests
+          new RescueGroupsClient(restClient, objectMapper, "test-key", 10L); // 10ms
+      // backoff
+      // for
+      // fast
+      // tests
       List<?> results = client.fetchPets("dog", "12345");
 
       // Assert: Results should come back (proving retry eventually succeeded)
@@ -136,7 +139,8 @@ class RescueGroupsClientRetryTest {
     try {
       // Act: Create client and call fetchPets
       RestClient restClient = RestClient.builder().baseUrl("http://localhost:" + port).build();
-      RescueGroupsClient client = new RescueGroupsClient(restClient, objectMapper, "test-key");
+      RescueGroupsClient client =
+          new RescueGroupsClient(restClient, objectMapper, "test-key", 1000L);
 
       // Assert: Should return empty list on 400 (no retries), not throw
       List<?> results = client.fetchPets("dog", "12345");

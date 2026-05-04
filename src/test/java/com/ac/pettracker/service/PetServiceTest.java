@@ -16,7 +16,7 @@ import org.springframework.web.client.RestClient;
 class PetServiceTest {
 
   private final RescueGroupsClient rescueGroupsClient =
-      new RescueGroupsClient(RestClient.builder().build(), new ObjectMapper(), "");
+      new RescueGroupsClient(RestClient.builder().build(), new ObjectMapper(), "", 1000L);
   private final PetRepository petRepository = new PetRepository();
   private final PetService petService = new PetService(rescueGroupsClient, petRepository);
 
@@ -84,7 +84,7 @@ class PetServiceTest {
   @Test
   void searchPetsUsesApiResultsWhenAvailable() {
     RescueGroupsClient apiClient =
-        new RescueGroupsClient(RestClient.builder().build(), new ObjectMapper(), "") {
+        new RescueGroupsClient(RestClient.builder().build(), new ObjectMapper(), "", 1000L) {
           @Override
           public List<Pet> fetchPets(String type, String location) {
             return List.of(
@@ -102,7 +102,7 @@ class PetServiceTest {
   @Test
   void searchPetsFallsBackToRepositoryWhenApiReturnsNoResults() {
     RescueGroupsClient apiClient =
-        new RescueGroupsClient(RestClient.builder().build(), new ObjectMapper(), "") {
+        new RescueGroupsClient(RestClient.builder().build(), new ObjectMapper(), "", 1000L) {
           @Override
           public List<Pet> fetchPets(String type, String location) {
             return List.of();

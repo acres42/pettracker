@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -35,27 +34,11 @@ public class RescueGroupsClient {
   private final long baseBackoffMs;
   private final Random random;
 
-  @Autowired
   public RescueGroupsClient(
-      @Value("${rescuegroups.base-url:https://api.rescuegroups.org/v5}") String baseUrl,
+      RestClient restClient,
+      ObjectMapper objectMapper,
       @Value("${rescuegroups.api-key:}") String apiKey,
       @Value("${rescuegroups.retry-backoff-ms:1000}") long baseBackoffMs) {
-    this(RestClient.builder().baseUrl(baseUrl).build(), new ObjectMapper(), apiKey, baseBackoffMs);
-  }
-
-  /**
-   * Testing constructor: uses a pre-built {@link RestClient} with a 1 000 ms base back-off.
-   *
-   * @param restClient the HTTP client to use
-   * @param objectMapper the JSON mapper
-   * @param apiKey the RescueGroups API key
-   */
-  public RescueGroupsClient(RestClient restClient, ObjectMapper objectMapper, String apiKey) {
-    this(restClient, objectMapper, apiKey, 1000);
-  }
-
-  public RescueGroupsClient(
-      RestClient restClient, ObjectMapper objectMapper, String apiKey, long baseBackoffMs) {
     this.restClient = restClient;
     this.objectMapper = objectMapper;
     this.apiKey = apiKey;
