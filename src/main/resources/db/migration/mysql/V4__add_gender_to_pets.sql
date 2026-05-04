@@ -1,2 +1,2 @@
 ALTER TABLE pets
-  ADD COLUMN gender ENUM('male', 'female') NULL AFTER type;
+  ADD COLUMN gender VARCHAR(10) NULL AFTER type;

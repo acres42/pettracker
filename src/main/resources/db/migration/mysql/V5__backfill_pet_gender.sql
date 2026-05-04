@@ -6,4 +6,4 @@ END
 WHERE gender IS NULL;
 
 ALTER TABLE pets
-  MODIFY COLUMN gender ENUM('male', 'female') NOT NULL;
+  MODIFY COLUMN gender VARCHAR(10) NOT NULL;
