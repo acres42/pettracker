@@ -1,6 +1,7 @@
 package com.ac.pettracker.controller;
 
-import com.ac.pettracker.model.Pet;
+import com.ac.pettracker.dto.PetDto;
+import com.ac.pettracker.dto.PetMapper;
 import com.ac.pettracker.repository.UserPreferencesRepository;
 import com.ac.pettracker.service.PetService;
 import jakarta.servlet.http.HttpSession;
@@ -47,11 +48,18 @@ public class SearchController extends BaseController {
 
     // Pass empty savedPetKeys so all matching pets appear in the carousel (saved pets show
     // with a disabled button rather than being excluded from discovery).
-    List<Pet> suggestedPets =
-        petService.getSuggestedPets(
-            getSessionString(session, "profileSpecies"), getSessionString(session, "profileGender"),
-            getSessionString(session, "profileWeight"), getSessionString(session, "profileBreed"),
-            getSessionString(session, "profileKeywords"), new HashSet<>());
+    List<PetDto> suggestedPets =
+        petService
+            .getSuggestedPets(
+                getSessionString(session, "profileSpecies"),
+                getSessionString(session, "profileGender"),
+                getSessionString(session, "profileWeight"),
+                getSessionString(session, "profileBreed"),
+                getSessionString(session, "profileKeywords"),
+                new HashSet<>())
+            .stream()
+            .map(PetMapper::toDto)
+            .toList();
     model.addAttribute("suggestedPets", suggestedPets);
     model.addAttribute("savedPetKeys", buildSavedPetKeys(session));
     return "search";
@@ -79,7 +87,8 @@ public class SearchController extends BaseController {
       throw new IllegalArgumentException("Missing search parameters");
     }
     logger.info("Searching pets with type={} location={}", type, location);
-    List<Pet> pets = petService.searchPets(type, location);
+    List<PetDto> pets =
+        petService.searchPets(type, location).stream().map(PetMapper::toDto).toList();
     model.addAttribute("type", type);
     model.addAttribute("location", location);
     model.addAttribute("pets", pets);
