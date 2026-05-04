@@ -1,5 +1,7 @@
 package com.ac.pettracker.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -10,6 +12,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 /** Global exception handler that maps common exceptions to error page responses. */
 @ControllerAdvice
 public class AppErrorController {
+
+  private static final Logger logger = LoggerFactory.getLogger(AppErrorController.class);
 
   /**
    * Handles missing required request parameters by returning a 400 error page.
@@ -47,7 +51,8 @@ public class AppErrorController {
    */
   @ExceptionHandler(RuntimeException.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  public String handleRuntimeException(Model model) {
+  public String handleRuntimeException(RuntimeException ex, Model model) {
+    logger.error("Unhandled exception", ex);
     model.addAttribute("errorTitle", "Something went wrong");
     model.addAttribute("errorMessage", "Please try again.");
     return "error";

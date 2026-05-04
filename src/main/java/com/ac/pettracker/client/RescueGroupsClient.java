@@ -1,12 +1,13 @@
 package com.ac.pettracker.client;
 
 import com.ac.pettracker.model.Pet;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +33,6 @@ public class RescueGroupsClient {
   private final ObjectMapper objectMapper;
   private final String apiKey;
   private final long baseBackoffMs;
-  private final Random random;
 
   public RescueGroupsClient(
       RestClient restClient,
@@ -43,7 +43,6 @@ public class RescueGroupsClient {
     this.objectMapper = objectMapper;
     this.apiKey = apiKey;
     this.baseBackoffMs = baseBackoffMs;
-    this.random = new Random();
   }
 
   /**
@@ -134,7 +133,7 @@ public class RescueGroupsClient {
 
   private long exponentialBackoffWithJitter(int attempt) {
     long baseDelay = baseBackoffMs * (long) Math.pow(2, attempt - 1);
-    long jitter = random.nextLong(baseDelay);
+    long jitter = ThreadLocalRandom.current().nextLong(baseDelay);
     return baseDelay + jitter;
   }
 
@@ -157,7 +156,7 @@ public class RescueGroupsClient {
     };
   }
 
-  private String buildRequestBody(String location) throws Exception {
+  private String buildRequestBody(String location) throws JsonProcessingException {
     ObjectNode root = objectMapper.createObjectNode();
     ObjectNode data = objectMapper.createObjectNode();
     if (location != null && !location.isBlank()) {
@@ -170,7 +169,7 @@ public class RescueGroupsClient {
     return objectMapper.writeValueAsString(root);
   }
 
-  private List<Pet> parseAnimals(String responseBody, String type) throws Exception {
+  private List<Pet> parseAnimals(String responseBody, String type) throws JsonProcessingException {
     JsonNode root = objectMapper.readTree(responseBody);
     JsonNode dataArray = root.path("data");
     JsonNode included = root.path("included");

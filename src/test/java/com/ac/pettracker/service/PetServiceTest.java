@@ -53,28 +53,6 @@ class PetServiceTest {
   }
 
   @Test
-  void searchPetsSortsByName() {
-    List<Pet> pets = petService.searchPets("dog", "46201", "name");
-
-    assertTrue(pets.get(0).getName().compareTo(pets.get(1).getName()) <= 0);
-  }
-
-  @Test
-  void searchPetsReturnsFirstPage() {
-    List<Pet> results = petService.searchPets("dog", "46201", null, 0, 2);
-
-    assertEquals(2, results.size());
-    assertEquals("Buddy", results.get(0).getName());
-  }
-
-  @Test
-  void searchPetsReturnsSecondPage() {
-    List<Pet> results = petService.searchPets("dog", "46201", null, 1, 2);
-
-    assertEquals(0, results.size());
-  }
-
-  @Test
   void searchPetsUsesApiResultsWhenAvailable() {
     RescueGroupsClient apiClient =
         new RescueGroupsClient(RestClient.builder().build(), new ObjectMapper(), "", 1000L) {

@@ -142,6 +142,7 @@ public class SavedPetEntry {
 
   public void setStatus(SavedPetStatus status) {
     this.status = status;
+    this.statusDate = LocalDate.now();
   }
 
   public LocalDate getStatusDate() {

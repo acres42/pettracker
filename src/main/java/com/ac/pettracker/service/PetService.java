@@ -47,53 +47,6 @@ public class PetService {
   }
 
   /**
-   * Searches for pets and sorts the results by the specified field.
-   *
-   * @param type the pet species
-   * @param location the search location string
-   * @param sort the field to sort by: {@code "name"}; any other value preserves the original order
-   * @return sorted, non-null list of matching pets
-   */
-  public List<Pet> searchPets(String type, String location, String sort) {
-    List<Pet> results = searchPets(type, location);
-    logger.info("Sorting pets by sort={}", sort);
-    if ("name".equalsIgnoreCase(sort)) {
-      return results.stream()
-          .sorted((first, second) -> first.getName().compareToIgnoreCase(second.getName()))
-          .toList();
-    }
-
-    return results;
-  }
-
-  /**
-   * Searches, sorts, and paginates pets.
-   *
-   * @param type the pet species
-   * @param location the search location string
-   * @param sort the sort field
-   * @param page zero-based page index
-   * @param size number of results per page
-   * @return a sub-list of pets for the requested page; empty if {@code page} is out of range
-   */
-  public List<Pet> searchPets(String type, String location, String sort, int page, int size) {
-    if (page < 0 || size <= 0 || size > 500) {
-      throw new IllegalArgumentException("Invalid pagination parameters");
-    }
-    logger.info("Paginating pets with page={} size={}", page, size);
-    List<Pet> results = searchPets(type, location, sort);
-
-    int start = page * size;
-    int end = Math.min(start + size, results.size());
-
-    if (start >= results.size()) {
-      return List.of();
-    }
-
-    return results.subList(start, end);
-  }
-
-  /**
    * Returns pets that match the user's profile preferences, excluding already-saved pets.
    *
    * @param species the preferred species; empty string means no filter
