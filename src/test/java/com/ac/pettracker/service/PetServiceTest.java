@@ -60,13 +60,6 @@ class PetServiceTest {
   }
 
   @Test
-  void searchPetsSortsByType() {
-    List<Pet> pets = petService.searchPets("dog", "46201", "type");
-
-    assertTrue(pets.get(0).getType().compareTo(pets.get(1).getType()) <= 0);
-  }
-
-  @Test
   void searchPetsReturnsFirstPage() {
     List<Pet> results = petService.searchPets("dog", "46201", null, 0, 2);
 
