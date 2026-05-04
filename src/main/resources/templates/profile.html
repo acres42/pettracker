@@ -91,6 +91,14 @@
           </select>
         </label>
         <label>
+          <span>Gender</span>
+          <select name="gender">
+            <option value="" th:selected="${profileGender == null || profileGender.isBlank()}">Any gender</option>
+            <option value="male" th:selected="${profileGender == 'male'}">Male</option>
+            <option value="female" th:selected="${profileGender == 'female'}">Female</option>
+          </select>
+        </label>
+        <label>
           <span>Weight</span>
           <select name="weight">
             <option value="" th:selected="${profileWeight == null || profileWeight.isBlank()}">Select weight</option>

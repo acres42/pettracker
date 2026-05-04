@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
   <meta charset="UTF-8" />
@@ -64,6 +64,135 @@
       </button>
     </form>
   </main>
+
+  <section th:if="${suggestedPets != null and !#lists.isEmpty(suggestedPets)}" class="glass suggested-pets">
+    <p class="eyebrow">
+      Based on your preferences
+    </p>
+    <h2>
+      Pets You May Like
+    </h2>
+    <div class="carousel-wrapper">
+      <button class="carousel-btn carousel-prev" aria-label="Previous pet">&#9664;</button>
+      <div class="carousel-viewport">
+        <div class="carousel-track">
+          <div class="carousel-card" th:each="pet : ${suggestedPets}">
+            <div class="carousel-card-inner">
+              <div th:if="${pet.imageUrl != null and !pet.imageUrl.isBlank()}">
+                <img th:src="${pet.imageUrl}" th:alt="${pet.name}" class="carousel-img" />
+              </div>
+              <div th:unless="${pet.imageUrl != null and !pet.imageUrl.isBlank()}" class="carousel-img-fallback">
+                No image
+              </div>
+              <h3 class="carousel-card-name" th:text="${pet.name}">Pet name</h3>
+              <p class="carousel-card-type" th:text="${pet.type}">type</p>
+              <p class="carousel-card-desc" th:text="${pet.description}">Description</p>
+              <form class="save-form" method="post" action="/dashboard/save">
+                <input type="hidden" name="name" th:value="${pet.name}" />
+                <input type="hidden" name="type" th:value="${pet.type}" />
+                <input type="hidden" name="breed" th:value="${pet.breed}" />
+                <input type="hidden" name="age" th:value="${pet.age}" />
+                <input type="hidden" name="description" th:value="${pet.description}" />
+                <input type="hidden" name="imageUrl" th:value="${pet.imageUrl}" />
+                <button class="carousel-save"
+                  th:classappend="${savedPetKeys != null and savedPetKeys.contains(pet.name + '|' + pet.type + '|' + pet.breed + '|' + pet.age)} ? 'is-saved' : ''"
+                  type="submit"
+                  th:attr="aria-pressed=${savedPetKeys != null and savedPetKeys.contains(pet.name + '|' + pet.type + '|' + pet.breed + '|' + pet.age)},disabled=${savedPetKeys != null and savedPetKeys.contains(pet.name + '|' + pet.type + '|' + pet.breed + '|' + pet.age)} ? 'disabled' : null"
+                  th:text="${savedPetKeys != null and savedPetKeys.contains(pet.name + '|' + pet.type + '|' + pet.breed + '|' + pet.age)} ? 'Saved ♥' : 'Save ♡'"
+                  aria-label="Save pet to dashboard">
+                  Save ♡
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="carousel-btn carousel-next" aria-label="Next pet">&#9654;</button>
+    </div>
+    <script>
+      (function () {
+        var viewport = document.querySelector('.carousel-viewport');
+        var track = document.querySelector('.carousel-track');
+        if (!track || !viewport) return;
+        var realCards = Array.from(track.children);
+        var n = realCards.length;
+        if (n === 0) return;
+
+        function mod(i, m) { return ((i % m) + m) % m; }
+
+        var clonesBefore = [realCards[mod(-2, n)], realCards[mod(-1, n)]].map(function (c) {
+          var cl = c.cloneNode(true);
+          cl.setAttribute('aria-hidden', 'true');
+          return cl;
+        });
+        var clonesAfter = [realCards[0], realCards[mod(1, n)]].map(function (c) {
+          var cl = c.cloneNode(true);
+          cl.setAttribute('aria-hidden', 'true');
+          return cl;
+        });
+        clonesBefore.forEach(function (c) { track.insertBefore(c, track.firstChild); });
+        clonesAfter.forEach(function (c) { track.appendChild(c); });
+
+        var current = 2;
+        var animating = false;
+
+        function cardWidth() { return viewport.offsetWidth / 3; }
+
+        function setWidths() {
+          var cw = cardWidth();
+          Array.from(track.children).forEach(function (c) {
+            c.style.width = cw + 'px';
+            c.style.flexShrink = '0';
+          });
+        }
+
+        function applyFocus() {
+          Array.from(track.children).forEach(function (c, i) {
+            c.classList.toggle('is-center', i === current);
+          });
+        }
+
+        function moveTo(index, animate) {
+          if (!animate) {
+            track.style.transition = 'none';
+            track.offsetHeight;
+          } else {
+            track.style.transition = 'transform 0.42s cubic-bezier(0.4, 0, 0.2, 1)';
+          }
+          track.style.transform = 'translateX(' + (-(index - 1) * cardWidth()) + 'px)';
+          current = index;
+          applyFocus();
+        }
+
+        setWidths();
+        moveTo(2, false);
+
+        track.addEventListener('transitionend', function () {
+          if (current < 2) moveTo(current + n, false);
+          else if (current > n + 1) moveTo(current - n, false);
+          animating = false;
+        });
+
+        document.querySelector('.carousel-prev').addEventListener('click', function () {
+          if (animating) return;
+          animating = true;
+          moveTo(current - 1, true);
+        });
+
+        document.querySelector('.carousel-next').addEventListener('click', function () {
+          if (animating) return;
+          animating = true;
+          moveTo(current + 1, true);
+        });
+
+        window.addEventListener('resize', function () {
+          setWidths();
+          moveTo(current, false);
+        });
+      })();
+    </script>
+  </section>
+
 </body>
 
 </html>

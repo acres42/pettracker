@@ -3,6 +3,8 @@ package com.ac.pettracker.controller;
 import com.ac.pettracker.model.Pet;
 import com.ac.pettracker.model.SavedPetEntry;
 import com.ac.pettracker.model.SavedPetStatus;
+import com.ac.pettracker.model.UserPreferences;
+import com.ac.pettracker.repository.UserPreferencesRepository;
 import com.ac.pettracker.service.AuthService;
 import com.ac.pettracker.service.PetService;
 import jakarta.servlet.http.HttpSession;
@@ -15,6 +17,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,11 +29,23 @@ public class PageController {
 
   private final PetService petService;
   private final AuthService authService;
+  private final UserPreferencesRepository userPreferencesRepository;
   private static final Logger logger = LoggerFactory.getLogger(PageController.class);
 
-  public PageController(PetService petService, AuthService authService) {
+  /**
+   * Constructs a {@code PageController} with its required dependencies.
+   *
+   * @param petService the pet search and suggestion service
+   * @param authService the user authentication service
+   * @param userPreferencesRepository the repository for persisting user preferences
+   */
+  public PageController(
+      PetService petService,
+      AuthService authService,
+      UserPreferencesRepository userPreferencesRepository) {
     this.petService = petService;
     this.authService = authService;
+    this.userPreferencesRepository = userPreferencesRepository;
   }
 
   /** Renders the home (landing) page. */
@@ -59,7 +74,23 @@ public class PageController {
     if (!isAuthenticated(session)) {
       return "redirect:/";
     }
+    loadPreferencesFromDb(session);
     model.addAttribute("query", query);
+
+    Set<String> savedPetKeys = buildSavedPetKeys(session);
+    // Pass empty savedPetKeys so all matching pets appear in the carousel (saved pets show
+    // with a disabled button rather than being excluded from discovery).
+    List<Pet> suggestedPets =
+        petService.getSuggestedPets(
+            getSessionString(session, "profileSpecies"),
+            getSessionString(session, "profileGender"),
+            getSessionString(session, "profileWeight"),
+            getSessionString(session, "profileBreed"),
+            getProfileKeywords(session),
+            new HashSet<>());
+    model.addAttribute("suggestedPets", suggestedPets);
+    model.addAttribute("savedPetKeys", savedPetKeys);
+
     return "search";
   }
 
@@ -134,10 +165,12 @@ public class PageController {
     if (!isAuthenticated(session)) {
       return "redirect:/";
     }
+    loadPreferencesFromDb(session);
     model.addAttribute("profileFirstName", getSessionString(session, "profileFirstName"));
     model.addAttribute("profileLastName", getSessionString(session, "profileLastName"));
     model.addAttribute("profileEmail", getSessionString(session, "authUserEmail"));
     model.addAttribute("profileSpecies", getSessionString(session, "profileSpecies"));
+    model.addAttribute("profileGender", getSessionString(session, "profileGender"));
     model.addAttribute("profileWeight", getSessionString(session, "profileWeight"));
     model.addAttribute("profileBreed", getSessionString(session, "profileBreed"));
     model.addAttribute("profileKeywords", getProfileKeywords(session));
@@ -180,6 +213,7 @@ public class PageController {
    * Handles profile preference updates submitted via the {@code /profile} form.
    *
    * @param species preferred pet species
+   * @param gender preferred pet gender ({@code male}, {@code female}, or blank for any)
    * @param weight preferred weight range
    * @param breed preferred breed
    * @param keywords search keywords
@@ -189,26 +223,30 @@ public class PageController {
   @PostMapping("/profile")
   public String updateProfile(
       @RequestParam(defaultValue = "") String species,
+      @RequestParam(defaultValue = "") String gender,
       @RequestParam(defaultValue = "") String weight,
       @RequestParam(defaultValue = "") String breed,
       @RequestParam(defaultValue = "") String keywords,
       HttpSession session) {
-    return updateProfilePreferences(species, weight, breed, keywords, session);
+    return updateProfilePreferences(species, gender, weight, breed, keywords, session);
   }
 
   /**
    * Handles profile preference updates submitted via the {@code /profile/preferences} form.
    *
    * @param species preferred pet species
+   * @param gender preferred pet gender ({@code male}, {@code female}, or blank for any)
    * @param weight preferred weight range
    * @param breed preferred breed
    * @param keywords search keywords
    * @param session the current HTTP session
    * @return a redirect to {@code /profile}, or {@code /} if not authenticated
    */
+  @Transactional
   @PostMapping("/profile/preferences")
   public String updateProfilePreferences(
       @RequestParam(defaultValue = "") String species,
+      @RequestParam(defaultValue = "") String gender,
       @RequestParam(defaultValue = "") String weight,
       @RequestParam(defaultValue = "") String breed,
       @RequestParam(defaultValue = "") String keywords,
@@ -216,10 +254,23 @@ public class PageController {
     if (!isAuthenticated(session)) {
       return "redirect:/";
     }
-    session.setAttribute("profileSpecies", normalizeSpecies(species));
-    session.setAttribute("profileWeight", normalizeWeight(weight));
-    session.setAttribute("profileBreed", normalizeTextField(breed));
-    session.setAttribute("profileKeywords", normalizeTextField(keywords));
+    String normalizedSpecies = normalizeSpecies(species);
+    String normalizedGender = normalizeGender(gender);
+    String normalizedWeight = normalizeWeight(weight);
+    String normalizedBreed = normalizeTextField(breed);
+    String normalizedKeywords = normalizeTextField(keywords);
+    session.setAttribute("profileSpecies", normalizedSpecies);
+    session.setAttribute("profileGender", normalizedGender);
+    session.setAttribute("profileWeight", normalizedWeight);
+    session.setAttribute("profileBreed", normalizedBreed);
+    session.setAttribute("profileKeywords", normalizedKeywords);
+    savePreferencesToDb(
+        session,
+        normalizedSpecies,
+        normalizedGender,
+        normalizedWeight,
+        normalizedBreed,
+        normalizedKeywords);
     return "redirect:/profile";
   }
 
@@ -429,6 +480,14 @@ public class PageController {
     };
   }
 
+  private String normalizeGender(String gender) {
+    String normalized = normalizeTextField(gender).toLowerCase();
+    return switch (normalized) {
+      case "male", "female" -> normalized;
+      default -> "";
+    };
+  }
+
   private String normalizeWeight(String weight) {
     String normalized = normalizeTextField(weight);
     return switch (normalized) {
@@ -470,5 +529,62 @@ public class PageController {
 
   private boolean isAuthenticated(HttpSession session) {
     return session != null && session.getAttribute("authUserId") != null;
+  }
+
+  private void loadPreferencesFromDb(HttpSession session) {
+    Object raw = session.getAttribute("authUserId");
+    if (raw == null) {
+      return;
+    }
+    Long userId = ((Number) raw).longValue();
+    userPreferencesRepository
+        .findByUserAccountId(userId)
+        .ifPresent(
+            prefs -> {
+              session.setAttribute("profileSpecies", nullToEmpty(prefs.getPreferredSpecies()));
+              session.setAttribute("profileGender", nullToEmpty(prefs.getPreferredGender()));
+              session.setAttribute("profileWeight", nullToEmpty(prefs.getPreferredWeightBand()));
+              session.setAttribute("profileBreed", nullToEmpty(prefs.getPreferredBreed()));
+              session.setAttribute("profileKeywords", nullToEmpty(prefs.getPreferredKeywords()));
+            });
+  }
+
+  private void savePreferencesToDb(
+      HttpSession session,
+      String species,
+      String gender,
+      String weight,
+      String breed,
+      String keywords) {
+    Object raw = session.getAttribute("authUserId");
+    if (raw == null) {
+      logger.warn("savePreferencesToDb: authUserId not in session, skipping save");
+      return;
+    }
+    Long userId = ((Number) raw).longValue();
+    logger.info(
+        "savePreferencesToDb: saving for userId={} species={} gender={} weight={} breed={}",
+        userId,
+        species,
+        gender,
+        weight,
+        breed);
+    UserPreferences prefs =
+        userPreferencesRepository.findByUserAccountId(userId).orElse(new UserPreferences(userId));
+    prefs.setPreferredSpecies(emptyToNull(species));
+    prefs.setPreferredGender(emptyToNull(gender));
+    prefs.setPreferredWeightBand(emptyToNull(weight));
+    prefs.setPreferredBreed(emptyToNull(breed));
+    prefs.setPreferredKeywords(emptyToNull(keywords));
+    userPreferencesRepository.save(prefs);
+    logger.info("savePreferencesToDb: saved prefs id={} for userId={}", prefs.getId(), userId);
+  }
+
+  private String nullToEmpty(String value) {
+    return value == null ? "" : value;
+  }
+
+  private String emptyToNull(String value) {
+    return (value == null || value.isBlank()) ? null : value;
   }
 }

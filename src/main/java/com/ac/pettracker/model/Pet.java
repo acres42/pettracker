@@ -52,6 +52,21 @@ public class Pet {
     this.imageUrl = imageUrl;
   }
 
+  /** Full constructor including gender and weight. */
+  public Pet(
+      String name,
+      String type,
+      String breed,
+      Integer age,
+      String description,
+      String imageUrl,
+      String gender,
+      Integer weightLbs) {
+    this(name, type, breed, age, description, imageUrl);
+    this.gender = gender;
+    this.weightLbs = weightLbs;
+  }
+
   public String getName() {
     return name;
   }

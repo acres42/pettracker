@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.ac.pettracker.repository.UserPreferencesRepository;
 import com.ac.pettracker.service.AuthService;
 import com.ac.pettracker.service.PetService;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,8 @@ class AuthGuardControllerTest {
   @MockitoBean private PetService petService;
 
   @MockitoBean private AuthService authService;
+
+  @MockitoBean private UserPreferencesRepository userPreferencesRepository;
 
   @Test
   void unauthenticatedSearchRedirectsHome() throws Exception {

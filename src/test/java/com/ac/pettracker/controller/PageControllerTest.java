@@ -2,7 +2,9 @@ package com.ac.pettracker.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -14,10 +16,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.ac.pettracker.model.Pet;
 import com.ac.pettracker.model.UserAccount;
+import com.ac.pettracker.model.UserPreferences;
+import com.ac.pettracker.repository.UserPreferencesRepository;
 import com.ac.pettracker.service.AuthService;
 import com.ac.pettracker.service.PetService;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +40,8 @@ class PageControllerTest {
   @MockitoBean private PetService petService;
 
   @MockitoBean private AuthService authService;
+
+  @MockitoBean private UserPreferencesRepository userPreferencesRepository;
 
   @Test
   void homePageReturnsIndexView() throws Exception {
@@ -597,10 +604,129 @@ class PageControllerTest {
     assertThat(notesHtml.indexOf("Amy")).isLessThan(notesHtml.indexOf("Zoe"));
   }
 
+  // --- DB persistence tests ---
+
+  @Test
+  void updateProfilePreferencesPersistsToDatabase() throws Exception {
+    given(userPreferencesRepository.findByUserAccountId(1L)).willReturn(java.util.Optional.empty());
+
+    mockMvc
+        .perform(
+            post("/profile/preferences")
+                .session(authenticatedSession())
+                .param("species", "dog")
+                .param("gender", "male")
+                .param("weight", "25-50lbs")
+                .param("breed", "beagle")
+                .param("keywords", "calm"))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/profile"));
+
+    verify(userPreferencesRepository)
+        .save(
+            argThat(
+                prefs ->
+                    "dog".equals(prefs.getPreferredSpecies())
+                        && "male".equals(prefs.getPreferredGender())
+                        && "25-50lbs".equals(prefs.getPreferredWeightBand())
+                        && "beagle".equals(prefs.getPreferredBreed())
+                        && "calm".equals(prefs.getPreferredKeywords())));
+  }
+
+  @Test
+  void profilePageLoadsPreferencesFromDatabase() throws Exception {
+    UserPreferences storedPrefs = new UserPreferences(1L);
+    storedPrefs.setPreferredSpecies("cat");
+    storedPrefs.setPreferredGender("female");
+    storedPrefs.setPreferredWeightBand("<25 lbs");
+    storedPrefs.setPreferredBreed("tabby");
+    storedPrefs.setPreferredKeywords("quiet");
+    given(userPreferencesRepository.findByUserAccountId(1L))
+        .willReturn(java.util.Optional.of(storedPrefs));
+
+    mockMvc
+        .perform(get("/profile").session(authenticatedSession()))
+        .andExpect(status().isOk())
+        .andExpect(model().attribute("profileSpecies", "cat"))
+        .andExpect(model().attribute("profileGender", "female"))
+        .andExpect(model().attribute("profileWeight", "<25 lbs"))
+        .andExpect(model().attribute("profileBreed", "tabby"))
+        .andExpect(model().attribute("profileKeywords", "quiet"));
+  }
+
+  // --- Carousel / suggested pets tests ---
+
+  @Test
+  void searchPageShowsSuggestedPetNamesWhenPreferencesSet() throws Exception {
+    Pet rex = new Pet("Rex", "dog", "Husky", 3, "Energetic and social", "/img/rex.jpg");
+    given(petService.getSuggestedPets("dog", "male", "", "", "", Set.of()))
+        .willReturn(List.of(rex));
+
+    mockMvc
+        .perform(get("/search").session(sessionWithPreferences("dog", "male", "", "", "")))
+        .andExpect(status().isOk())
+        .andExpect(view().name("search"))
+        .andExpect(content().string(containsString("Rex")))
+        .andExpect(content().string(containsString("Pets You May Like")));
+  }
+
+  @Test
+  void searchPageShowsNoCarouselWhenNoSuggestedPets() throws Exception {
+    given(petService.getSuggestedPets("", "", "", "", "", Set.of())).willReturn(List.of());
+
+    mockMvc
+        .perform(get("/search").session(sessionWithPreferences("", "", "", "", "")))
+        .andExpect(status().isOk())
+        .andExpect(view().name("search"))
+        .andExpect(
+            content().string(org.hamcrest.Matchers.not(containsString("Pets You May Like"))));
+  }
+
+  @Test
+  void searchPageExcludesSavedPetFromCarousel() throws Exception {
+    given(
+            petService.getSuggestedPets(
+                "dog", "", "", "", "", Set.of("Buddy|dog|Golden Retriever|4")))
+        .willReturn(List.of());
+
+    MockHttpSession session = sessionWithPreferences("dog", "", "", "", "");
+    session.setAttribute(
+        "savedPets",
+        new java.util.ArrayList<>(
+            List.of(
+                new com.ac.pettracker.model.SavedPetEntry(
+                    "Buddy",
+                    "dog",
+                    "Golden Retriever",
+                    4,
+                    "",
+                    "/img/buddy.jpg",
+                    "",
+                    "",
+                    com.ac.pettracker.model.SavedPetStatus.ACCEPTED,
+                    java.time.LocalDate.now()))));
+
+    mockMvc
+        .perform(get("/search").session(session))
+        .andExpect(status().isOk())
+        .andExpect(content().string(org.hamcrest.Matchers.not(containsString("Buddy"))));
+  }
+
   private MockHttpSession authenticatedSession() {
     MockHttpSession session = new MockHttpSession();
     session.setAttribute("authUserId", 1L);
     session.setAttribute("authUserEmail", "user@example.com");
+    return session;
+  }
+
+  private MockHttpSession sessionWithPreferences(
+      String species, String gender, String weightBand, String breed, String keywords) {
+    MockHttpSession session = authenticatedSession();
+    session.setAttribute("profileSpecies", species);
+    session.setAttribute("profileGender", gender);
+    session.setAttribute("profileWeight", weightBand);
+    session.setAttribute("profileBreed", breed);
+    session.setAttribute("profileKeywords", keywords);
     return session;
   }
 }
