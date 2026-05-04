@@ -170,6 +170,7 @@ Current baseline schema:
 
 - `user_accounts`
 - `user_preferences`
+- `pets`
 
 ## How Schema Design Works in Spring Boot
 
@@ -183,7 +184,7 @@ Recommended workflow:
 3. Keep `ddl-auto=validate` in MySQL environments so entities are checked against schema
 4. Let Flyway apply migrations automatically on app startup
 
-This gives predictable, reviewable schema history and is interview-friendly for senior reviewers.
+This gives predictable, reviewable schema history.
 
 ## Routes
 
