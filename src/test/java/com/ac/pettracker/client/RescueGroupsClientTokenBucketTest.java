@@ -56,7 +56,7 @@ class RescueGroupsClientTokenBucketTest {
           new RescueGroupsClientTokenBucket(restClient, objectMapper, "test-key");
 
       // Act: Fetch pets (will retry with token bucket rate limiting)
-      List<?> results = client.fetchPets("dog", "12345");
+      List<?> results = client.fetchPets("dog");
 
       // Assert: Should eventually succeed
       assertThat(results).isNotEmpty();

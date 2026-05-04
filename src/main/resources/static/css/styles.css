@@ -829,6 +829,16 @@ p {
   opacity: 1;
 }
 
+.carousel-card.is-left {
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 65%);
+  mask-image: linear-gradient(to right, transparent 0%, black 65%);
+}
+
+.carousel-card.is-right {
+  -webkit-mask-image: linear-gradient(to left, transparent 0%, black 65%);
+  mask-image: linear-gradient(to left, transparent 0%, black 65%);
+}
+
 .carousel-card-inner {
   display: flex;
   flex-direction: column;

@@ -2,6 +2,7 @@ package com.ac.pettracker.controller;
 
 import com.ac.pettracker.dto.PetDto;
 import com.ac.pettracker.dto.PetMapper;
+import com.ac.pettracker.dto.PetSearchResult;
 import com.ac.pettracker.service.PetService;
 import com.ac.pettracker.service.ProfileService;
 import jakarta.servlet.http.HttpSession;
@@ -32,16 +33,13 @@ public class SearchController {
   /**
    * Renders the pet search form.
    *
-   * @param query optional pre-filled search query
    * @param model the Spring MVC model
    * @param session the current HTTP session
    * @return the {@code search} view
    */
   @GetMapping("/search")
-  public String search(
-      @RequestParam(name = "q", required = false) String query, Model model, HttpSession session) {
+  public String search(Model model, HttpSession session) {
     profileService.populateSessionPreferences(SessionHelper.getUserId(session), session);
-    model.addAttribute("query", query);
 
     // Pass empty savedPetKeys so all matching pets appear in the carousel (saved pets show
     // with a disabled button rather than being excluded from discovery).
@@ -65,8 +63,16 @@ public class SearchController {
   /**
    * Performs a pet search and renders the results page.
    *
+   * <p>Keywords from the form take precedence over the user's profile keywords; if the form
+   * keywords are blank, the profile keywords are used. A blank effective-keywords value means no
+   * keyword filtering is applied.
+   *
    * @param type the pet species to search for
-   * @param location the location to search in
+   * @param gender optional gender filter ({@code "male"} or {@code "female"}); blank means any
+   * @param ageBand optional age range filter ({@code "young"}, {@code "adult"}, or {@code
+   *     "senior"}); blank means any
+   * @param keywords optional comma-separated keyword filter for pet descriptions; blank defers to
+   *     profile keywords
    * @param model the Spring MVC model
    * @param session the current HTTP session
    * @return the {@code results} view
@@ -74,18 +80,30 @@ public class SearchController {
   @GetMapping("/pets/results")
   public String results(
       @RequestParam(required = false) String type,
-      @RequestParam(required = false) String location,
+      @RequestParam(defaultValue = "") String gender,
+      @RequestParam(defaultValue = "") String ageBand,
+      @RequestParam(defaultValue = "") String keywords,
       Model model,
       HttpSession session) {
-    if (type == null || type.isBlank() || location == null || location.isBlank()) {
+    if (type == null || type.isBlank()) {
       throw new IllegalArgumentException("Missing search parameters");
     }
-    logger.info("Searching pets with type={} location={}", type, location);
-    List<PetDto> pets =
-        petService.searchPets(type, location).stream().map(PetMapper::toDto).toList();
+    String effectiveKeywords =
+        keywords.isBlank() ? SessionHelper.getSessionString(session, "profileKeywords") : keywords;
+    logger.info(
+        "Searching pets with type={} gender={} ageBand={} keywords={}",
+        type,
+        gender,
+        ageBand,
+        effectiveKeywords);
+    PetSearchResult searchResult = petService.searchPets(type, gender, ageBand, effectiveKeywords);
+    List<PetDto> pets = searchResult.pets().stream().map(PetMapper::toDto).toList();
     model.addAttribute("type", type);
-    model.addAttribute("location", location);
+    model.addAttribute("gender", gender);
+    model.addAttribute("ageBand", ageBand);
+    model.addAttribute("keywords", keywords);
     model.addAttribute("pets", pets);
+    model.addAttribute("unmatchedKeywords", searchResult.unmatchedKeywords());
     model.addAttribute("savedPetKeys", SessionHelper.buildSavedPetKeys(session));
     return "results";
   }

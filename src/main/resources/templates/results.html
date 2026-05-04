@@ -41,10 +41,19 @@
     <p class="lede">
       Showing
       <span th:text="${type}"></span>
-      results near
-      <span th:text="${location}"></span>
-      .
+      results.
     </p>
+
+    <section class="keyword-no-match" th:if="${unmatchedKeywords != null and !#lists.isEmpty(unmatchedKeywords)}">
+      <p>
+        No pets matched the
+        <strong th:each="kw, iterStat : ${unmatchedKeywords}">
+          <span th:text="${kw}"></span><span th:if="${!iterStat.last}">, </span>
+        </strong>
+        keyword<span th:if="${#lists.size(unmatchedKeywords) > 1}">s</span>.
+        Try broadening your search.
+      </p>
+    </section>
 
     <section class="empty-state" th:if="${#lists.isEmpty(pets)}">
       <h2>
@@ -67,6 +76,7 @@
 
         <h2 th:text="${pet.name}">Buddy</h2>
         <p class="pet-type" th:text="${pet.type}">dog</p>
+        <p class="pet-gender" th:text="${pet.gender != null and !pet.gender.isBlank() ? pet.gender : '—'}">—</p>
         <p th:text="${pet.description}">Friendly dog</p>
 
         <form class="save-form" method="post" th:action="@{/dashboard/save}">
@@ -76,6 +86,7 @@
           <input type="hidden" name="age" th:value="${pet.age}" />
           <input type="hidden" name="description" th:value="${pet.description}" />
           <input type="hidden" name="imageUrl" th:value="${pet.imageUrl}" />
+          <input type="hidden" name="gender" th:value="${pet.gender}" />
           <button class="heart-save"
             th:classappend="${savedPetKeys.contains(pet.name + '|' + pet.type + '|' + pet.breed + '|' + pet.age)} ? 'is-saved' : ''"
             type="submit"

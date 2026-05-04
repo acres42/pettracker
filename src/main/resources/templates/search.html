@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Search adoptable pets by type and location in PetTracker." />
   <meta property="og:title" content="PetTracker Search" />
-  <meta property="og:description" content="Find adoptable pets by type and ZIP code." />
+  <meta property="og:description" content="Find adoptable pets by type." />
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png" />
   <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
@@ -41,22 +41,51 @@
     </h1>
 
     <p class="lede">
-      Search adoptable pets by animal type and ZIP code.
+      Search adoptable pets by animal type.
     </p>
 
     <form class="search-bar" method="get" action="/pets/results">
       <label>
         <span>
-          Animal type
+          Animal Type
         </span>
-        <input name="type" placeholder="Dog, cat, rabbit..." required />
+        <select name="type" required>
+          <option value="">Select type...</option>
+          <option value="dog">Dog</option>
+          <option value="cat">Cat</option>
+          <option value="rabbit">Rabbit</option>
+          <option value="bird">Bird</option>
+        </select>
       </label>
 
       <label>
         <span>
-          Location
+          Gender
         </span>
-        <input name="location" placeholder="ZIP code" required />
+        <select name="gender">
+          <option value="">Any</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </label>
+
+      <label>
+        <span>
+          Age
+        </span>
+        <select name="ageBand">
+          <option value="">Any</option>
+          <option value="young">Young (0–2 yrs)</option>
+          <option value="adult">Adult (3–7 yrs)</option>
+          <option value="senior">Senior (8+ yrs)</option>
+        </select>
+      </label>
+
+      <label>
+        <span>
+          Keywords
+        </span>
+        <input name="keywords" placeholder="e.g. calm, good with kids" />
       </label>
 
       <button type="submit">
@@ -149,6 +178,8 @@
         function applyFocus() {
           Array.from(track.children).forEach(function (c, i) {
             c.classList.toggle('is-center', i === current);
+            c.classList.toggle('is-left', i === current - 1);
+            c.classList.toggle('is-right', i === current + 1);
           });
         }
 

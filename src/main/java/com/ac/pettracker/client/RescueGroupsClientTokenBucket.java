@@ -63,16 +63,15 @@ public class RescueGroupsClientTokenBucket {
   }
 
   /**
-   * Fetches available pets from the RescueGroups API for the given type and location, using
-   * token-bucket rate limiting between retry attempts.
+   * Fetches available pets from the RescueGroups API for the given type, using token-bucket rate
+   * limiting between retry attempts.
    *
    * <p>Returns an empty list when the API key is blank, on a 4xx error, or after all retries fail.
    *
    * @param type the pet species (e.g., "dog", "cat")
-   * @param location the search location string passed in the request body
    * @return non-null list of pets returned by the API; empty on failure or no results
    */
-  public List<Pet> fetchPets(String type, String location) {
+  public List<Pet> fetchPets(String type) {
     if (apiKey == null || apiKey.isBlank()) {
       logger.warn("RescueGroups API key not configured; returning no API results");
       return List.of();
@@ -89,7 +88,7 @@ public class RescueGroupsClientTokenBucket {
         }
 
         String species = toSpeciesView(type);
-        String requestBody = buildRequestBody(location);
+        String requestBody = buildRequestBody();
 
         String responseBody =
             restClient
@@ -160,16 +159,9 @@ public class RescueGroupsClientTokenBucket {
     };
   }
 
-  private String buildRequestBody(String location) throws Exception {
+  private String buildRequestBody() throws Exception {
     ObjectNode root = objectMapper.createObjectNode();
-    ObjectNode data = objectMapper.createObjectNode();
-    if (location != null && !location.isBlank()) {
-      ObjectNode filterRadius = objectMapper.createObjectNode();
-      filterRadius.put("postalcode", location);
-      filterRadius.put("miles", 100);
-      data.set("filterRadius", filterRadius);
-    }
-    root.set("data", data);
+    root.set("data", objectMapper.createObjectNode());
     return objectMapper.writeValueAsString(root);
   }
 

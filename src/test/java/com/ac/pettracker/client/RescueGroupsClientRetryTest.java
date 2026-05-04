@@ -96,7 +96,7 @@ class RescueGroupsClientRetryTest {
       // for
       // fast
       // tests
-      List<?> results = client.fetchPets("dog", "12345");
+      List<?> results = client.fetchPets("dog");
 
       // Assert: Results should come back (proving retry eventually succeeded)
       assertThat(results).isNotEmpty();
@@ -143,7 +143,7 @@ class RescueGroupsClientRetryTest {
           new RescueGroupsClient(restClient, objectMapper, "test-key", 1000L);
 
       // Assert: Should return empty list on 400 (no retries), not throw
-      List<?> results = client.fetchPets("dog", "12345");
+      List<?> results = client.fetchPets("dog");
       assertThat(results).isEmpty(); // Returns empty on permanent error
       assertThat(attemptCount.get()).isEqualTo(1); // Only 1 attempt, no retries
     } finally {

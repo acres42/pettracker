@@ -1,10 +1,13 @@
 package com.ac.pettracker.service;
 
 import com.ac.pettracker.client.RescueGroupsClient;
+import com.ac.pettracker.dto.PetSearchResult;
 import com.ac.pettracker.model.Pet;
 import com.ac.pettracker.model.PetKeys;
 import com.ac.pettracker.repository.PetRepository;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -28,22 +31,89 @@ public class PetService {
   }
 
   /**
-   * Searches for pets by type and location, falling back to the local repository if the API returns
-   * no results.
+   * Searches for pets by type, falling back to the local repository if the API returns no results.
    *
    * @param type the pet species (e.g., "dog", "cat")
-   * @param location the search location string
    * @return non-null list of matching pets
    */
-  public List<Pet> searchPets(String type, String location) {
-    logger.info("Filtering pets by type={} location={}", type, location);
-    List<Pet> apiPets = rescueGroupsClient.fetchPets(type, location);
+  public List<Pet> searchPets(String type) {
+    logger.info("Filtering pets by type={}", type);
+    List<Pet> apiPets = rescueGroupsClient.fetchPets(type);
     if (!apiPets.isEmpty()) {
       return apiPets;
     }
 
     logger.info("Falling back to local repository data for type={}", type);
     return petRepository.findByType(type);
+  }
+
+  /**
+   * Searches for pets by type, then filters by gender and age band.
+   *
+   * <p>Falls back to the local repository if the API returns no results. Empty strings for {@code
+   * gender} and {@code ageBand} disable their respective filters.
+   *
+   * @param type the pet species (e.g., "dog", "cat")
+   * @param gender the pet gender ({@code "male"} or {@code "female"}); blank means no filter
+   * @param ageBand age range: {@code "young"} (0–2), {@code "adult"} (3–7), {@code "senior"} (8+);
+   *     blank means no filter
+   * @return non-null filtered list of matching pets
+   */
+  public List<Pet> searchPets(String type, String gender, String ageBand) {
+    List<Pet> results = searchPets(type);
+    return results.stream()
+        .filter(pet -> matchesGender(pet, gender))
+        .filter(pet -> matchesAgeBand(pet, ageBand))
+        .toList();
+  }
+
+  /**
+   * Searches for pets by type, location, gender, and age band, then filters by keywords against
+   * each pet's description.
+   *
+   * <p>Keywords are sourced from {@code keywords}: a comma-separated string whose terms are
+   * trimmed, deduplicated, and capped at <strong>5</strong> before matching. A pet is included if
+   * at least one keyword appears (case-insensitive) in its description. When {@code keywords} is
+   * blank, all candidates are returned and no keywords are reported as unmatched.
+   *
+   * <p>The filtering and unmatched-keyword detection are done in a single O(n) pass over the
+   * candidate list.
+   *
+   * @param type the pet species (e.g., "dog", "cat")
+   * @param gender the pet gender ({@code "male"} or {@code "female"}); blank means no filter
+   * @param ageBand age range ({@code "young"}, {@code "adult"}, {@code "senior"}); blank means no
+   *     filter
+   * @param keywords comma-separated search terms; blank means return all candidates
+   * @return a {@link PetSearchResult} containing matched pets and any unmatched keywords
+   */
+  public PetSearchResult searchPets(String type, String gender, String ageBand, String keywords) {
+    List<Pet> candidates = searchPets(type, gender, ageBand);
+    List<String> keywordList = parseKeywords(keywords);
+
+    if (keywordList.isEmpty()) {
+      return new PetSearchResult(candidates, List.of());
+    }
+
+    // Single O(n × k) pass: filter pets and record which keywords produced at least one match
+    Set<String> matchedKeywords = new HashSet<>();
+    List<Pet> matched = new ArrayList<>();
+    for (Pet pet : candidates) {
+      String descLower = pet.getDescription() != null ? pet.getDescription().toLowerCase() : "";
+      boolean petMatched = false;
+      for (String kw : keywordList) {
+        if (descLower.contains(kw.toLowerCase())) {
+          matchedKeywords.add(kw);
+          petMatched = true;
+        }
+      }
+      if (petMatched) {
+        matched.add(pet);
+      }
+    }
+
+    List<String> unmatched =
+        keywordList.stream().filter(kw -> !matchedKeywords.contains(kw)).toList();
+    return new PetSearchResult(matched, unmatched);
   }
 
   /**
@@ -87,11 +157,43 @@ public class PetService {
         .toList();
   }
 
+  /**
+   * Parses a raw comma-separated keyword string into a trimmed, deduplicated list capped at 5
+   * terms. Returns an empty list when {@code raw} is blank.
+   */
+  private static List<String> parseKeywords(String raw) {
+    if (raw == null || raw.isBlank()) {
+      return List.of();
+    }
+    return Arrays.stream(raw.split(","))
+        .map(String::trim)
+        .filter(kw -> !kw.isBlank())
+        .distinct()
+        .limit(5)
+        .toList();
+  }
+
   private boolean matchesGender(Pet pet, String gender) {
     if (gender == null || gender.isBlank()) {
       return true;
     }
     return gender.equalsIgnoreCase(pet.getGender());
+  }
+
+  private boolean matchesAgeBand(Pet pet, String ageBand) {
+    if (ageBand == null || ageBand.isBlank()) {
+      return true;
+    }
+    if (pet.getAge() == null) {
+      return false;
+    }
+    int age = pet.getAge();
+    return switch (ageBand) {
+      case "young" -> age <= 2;
+      case "adult" -> age >= 3 && age <= 7;
+      case "senior" -> age >= 8;
+      default -> true;
+    };
   }
 
   private boolean matchesWeightBand(Pet pet, String weightBand) {

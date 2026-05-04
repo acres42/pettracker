@@ -31,7 +31,7 @@ class RescueGroupsClientTest {
             1000L);
 
     try {
-      List<Pet> pets = client.fetchPets("dog", "46201");
+      List<Pet> pets = client.fetchPets("dog");
 
       assertEquals(1, pets.size());
       Pet pet = pets.getFirst();
@@ -50,7 +50,7 @@ class RescueGroupsClientTest {
     RescueGroupsClient client =
         new RescueGroupsClient(RestClient.builder().build(), new ObjectMapper(), "", 1000L);
 
-    List<Pet> pets = client.fetchPets("dog", "46201");
+    List<Pet> pets = client.fetchPets("dog");
 
     assertTrue(pets.isEmpty());
   }

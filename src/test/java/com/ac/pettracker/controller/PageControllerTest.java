@@ -100,30 +100,27 @@ class PageControllerTest {
 
   @Test
   void searchResultsPageLoadsWithFakePets() throws Exception {
-    given(petService.searchPets("dog", "46201"))
+    given(petService.searchPets("dog", "", "", ""))
         .willReturn(
-            List.of(
-                new Pet(
-                    "Buddy",
-                    "dog",
-                    "Golden Retriever",
-                    4,
-                    "Friendly dog",
-                    "/images/pets/buddy.jpg",
-                    null,
-                    null)));
+            new com.ac.pettracker.dto.PetSearchResult(
+                List.of(
+                    new Pet(
+                        "Buddy",
+                        "dog",
+                        "Golden Retriever",
+                        4,
+                        "Friendly dog",
+                        "/images/pets/buddy.jpg",
+                        null,
+                        null)),
+                List.of()));
 
     mockMvc
-        .perform(
-            get("/pets/results")
-                .session(authenticatedSession())
-                .param("type", "dog")
-                .param("location", "46201"))
+        .perform(get("/pets/results").session(authenticatedSession()).param("type", "dog"))
         .andExpect(status().isOk())
         .andExpect(view().name("results"))
         .andExpect(model().attributeExists("pets"))
         .andExpect(model().attribute("type", "dog"))
-        .andExpect(model().attribute("location", "46201"))
         .andExpect(content().string(containsString("name=\"viewport\"")))
         .andExpect(content().string(containsString("name=\"description\"")))
         .andExpect(content().string(containsString("property=\"og:title\"")))
@@ -135,27 +132,29 @@ class PageControllerTest {
 
   @Test
   void searchResultsHeartReflectsWhetherPetIsAlreadySaved() throws Exception {
-    given(petService.searchPets("dog", "46201"))
+    given(petService.searchPets("dog", "", "", ""))
         .willReturn(
-            List.of(
-                new Pet(
-                    "Buddy",
-                    "dog",
-                    "Golden Retriever",
-                    4,
-                    "Friendly dog",
-                    "/images/pets/buddy.jpg",
-                    null,
-                    null),
-                new Pet(
-                    "Milo",
-                    "dog",
-                    "Beagle",
-                    2,
-                    "Curious dog",
-                    "/images/pets/milo.jpg",
-                    null,
-                    null)));
+            new com.ac.pettracker.dto.PetSearchResult(
+                List.of(
+                    new Pet(
+                        "Buddy",
+                        "dog",
+                        "Golden Retriever",
+                        4,
+                        "Friendly dog",
+                        "/images/pets/buddy.jpg",
+                        null,
+                        null),
+                    new Pet(
+                        "Milo",
+                        "dog",
+                        "Beagle",
+                        2,
+                        "Curious dog",
+                        "/images/pets/milo.jpg",
+                        null,
+                        null)),
+                List.of()));
 
     MockHttpSession session = new MockHttpSession();
     session.setAttribute("authUserId", 1L);
@@ -163,11 +162,7 @@ class PageControllerTest {
 
     MvcResult beforeSave =
         mockMvc
-            .perform(
-                get("/pets/results")
-                    .session(session)
-                    .param("type", "dog")
-                    .param("location", "46201"))
+            .perform(get("/pets/results").session(session).param("type", "dog"))
             .andExpect(status().isOk())
             .andReturn();
 
@@ -191,11 +186,7 @@ class PageControllerTest {
 
     MvcResult afterSave =
         mockMvc
-            .perform(
-                get("/pets/results")
-                    .session(session)
-                    .param("type", "dog")
-                    .param("location", "46201"))
+            .perform(get("/pets/results").session(session).param("type", "dog"))
             .andExpect(status().isOk())
             .andReturn();
 
@@ -216,43 +207,37 @@ class PageControllerTest {
 
   @Test
   void searchResultsPageShowsEmptyStateWhenNoPetsFound() throws Exception {
-    given(petService.searchPets("bird", "46201")).willReturn(List.of());
+    given(petService.searchPets("bird", "", "", ""))
+        .willReturn(new com.ac.pettracker.dto.PetSearchResult(List.of(), List.of()));
 
     mockMvc
-        .perform(
-            get("/pets/results")
-                .session(authenticatedSession())
-                .param("type", "bird")
-                .param("location", "46201"))
+        .perform(get("/pets/results").session(authenticatedSession()).param("type", "bird"))
         .andExpect(status().isOk())
         .andExpect(view().name("results"))
         .andExpect(model().attributeExists("pets"))
         .andExpect(model().attribute("type", "bird"))
-        .andExpect(model().attribute("location", "46201"))
         .andExpect(content().string(containsString("No pets found")));
   }
 
   @Test
   void searchResultsPageRendersPetImageWhenImageUrlExists() throws Exception {
-    when(petService.searchPets("dog", "46201"))
+    when(petService.searchPets("dog", "", "", ""))
         .thenReturn(
-            List.of(
-                new Pet(
-                    "Buddy",
-                    "dog",
-                    "Golden Retriever",
-                    4,
-                    "Friendly dog",
-                    "/images/pets/buddy.jpg",
-                    null,
-                    null)));
+            new com.ac.pettracker.dto.PetSearchResult(
+                List.of(
+                    new Pet(
+                        "Buddy",
+                        "dog",
+                        "Golden Retriever",
+                        4,
+                        "Friendly dog",
+                        "/images/pets/buddy.jpg",
+                        null,
+                        null)),
+                List.of()));
 
     mockMvc
-        .perform(
-            get("/pets/results")
-                .session(authenticatedSession())
-                .param("type", "dog")
-                .param("location", "46201"))
+        .perform(get("/pets/results").session(authenticatedSession()).param("type", "dog"))
         .andExpect(status().isOk())
         .andExpect(content().string(containsString("<img")))
         .andExpect(content().string(containsString("/images/pets/buddy.jpg")))
@@ -261,17 +246,15 @@ class PageControllerTest {
 
   @Test
   void searchResultsPageRendersFallbackWhenImageUrlIsMissing() throws Exception {
-    when(petService.searchPets("dog", "46201"))
+    when(petService.searchPets("dog", "", "", ""))
         .thenReturn(
-            List.of(
-                new Pet("Buddy", "dog", "Golden Retriever", 4, "Friendly dog", "", null, null)));
+            new com.ac.pettracker.dto.PetSearchResult(
+                List.of(
+                    new Pet("Buddy", "dog", "Golden Retriever", 4, "Friendly dog", "", null, null)),
+                List.of()));
 
     mockMvc
-        .perform(
-            get("/pets/results")
-                .session(authenticatedSession())
-                .param("type", "dog")
-                .param("location", "46201"))
+        .perform(get("/pets/results").session(authenticatedSession()).param("type", "dog"))
         .andExpect(status().isOk())
         .andExpect(content().string(containsString("No image available")));
   }
@@ -455,6 +438,7 @@ class PageControllerTest {
             .andExpect(view().name("dashboard"))
             .andExpect(content().string(containsString("sort=name")))
             .andExpect(content().string(containsString("sort=type")))
+            .andExpect(content().string(containsString("sort=gender")))
             .andExpect(content().string(containsString("sort=breed")))
             .andExpect(content().string(containsString("sort=age")))
             .andExpect(content().string(containsString("sort=savedAt")))
@@ -464,6 +448,8 @@ class PageControllerTest {
             .andReturn();
 
     String html = result.getResponse().getContentAsString();
+    assertThat(html.indexOf("Type")).isLessThan(html.indexOf("Gender"));
+    assertThat(html.indexOf("Gender")).isLessThan(html.indexOf("Breed"));
     assertThat(html.indexOf("Age")).isLessThan(html.indexOf("Keywords"));
     assertThat(html.indexOf("Keywords")).isLessThan(html.indexOf("Notes"));
   }
@@ -716,6 +702,18 @@ class PageControllerTest {
   }
 
   @Test
+  void searchPageCarouselScriptAssignsIsLeftAndIsRightClasses() throws Exception {
+    Pet rex = new Pet("Rex", "dog", "Husky", 3, "Energetic and social", "/img/rex.jpg", null, null);
+    given(petService.getSuggestedPets("dog", "", "", "", "", Set.of())).willReturn(List.of(rex));
+
+    mockMvc
+        .perform(get("/search").session(sessionWithPreferences("dog", "", "", "", "")))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("is-left")))
+        .andExpect(content().string(containsString("is-right")));
+  }
+
+  @Test
   void searchPageShowsNoCarouselWhenNoSuggestedPets() throws Exception {
     given(petService.getSuggestedPets("", "", "", "", "", Set.of())).willReturn(List.of());
 
@@ -748,6 +746,7 @@ class PageControllerTest {
                     "/img/buddy.jpg",
                     "",
                     "",
+                    "",
                     com.ac.pettracker.model.SavedPetStatus.ACCEPTED,
                     java.time.LocalDate.now()))));
 
@@ -755,6 +754,139 @@ class PageControllerTest {
         .perform(get("/search").session(session))
         .andExpect(status().isOk())
         .andExpect(content().string(org.hamcrest.Matchers.not(containsString("Buddy"))));
+  }
+
+  @Test
+  void searchFormHasGenderAndAgeSelects() throws Exception {
+    mockMvc
+        .perform(get("/search").session(authenticatedSession()))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("name=\"gender\"")))
+        .andExpect(content().string(containsString("name=\"ageBand\"")))
+        .andExpect(content().string(containsString("name=\"type\"")))
+        .andExpect(content().string(containsString("<select")));
+  }
+
+  @Test
+  void searchResultsPageShowsGenderOnPetCard() throws Exception {
+    given(petService.searchPets("dog", "", "", ""))
+        .willReturn(
+            new com.ac.pettracker.dto.PetSearchResult(
+                List.of(
+                    new Pet(
+                        "Buddy",
+                        "dog",
+                        "Golden Retriever",
+                        4,
+                        "Friendly dog",
+                        "/images/pets/buddy.jpg",
+                        "male",
+                        45)),
+                List.of()));
+
+    mockMvc
+        .perform(get("/pets/results").session(authenticatedSession()).param("type", "dog"))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("pet-gender")))
+        .andExpect(content().string(containsString("male")));
+  }
+
+  @Test
+  void dashboardShowsGenderColumnAfterType() throws Exception {
+    MvcResult saveResult =
+        mockMvc
+            .perform(
+                post("/dashboard/save")
+                    .with(csrf())
+                    .session(authenticatedSession())
+                    .param("name", "Buddy")
+                    .param("type", "dog")
+                    .param("gender", "male")
+                    .param("breed", "Golden Retriever")
+                    .param("age", "4")
+                    .param("description", "Friendly dog")
+                    .param("imageUrl", "/images/pets/buddy.jpg"))
+            .andExpect(status().is3xxRedirection())
+            .andReturn();
+
+    MockHttpSession session = (MockHttpSession) saveResult.getRequest().getSession(false);
+    MvcResult dashboardResult =
+        mockMvc.perform(get("/dashboard").session(session)).andExpect(status().isOk()).andReturn();
+
+    String html = dashboardResult.getResponse().getContentAsString();
+    assertThat(html).contains("Gender");
+    assertThat(html).contains("male");
+    assertThat(html.indexOf("Type")).isLessThan(html.indexOf("Gender"));
+    assertThat(html.indexOf("Gender")).isLessThan(html.indexOf("Breed"));
+  }
+
+  @Test
+  void searchFormHasKeywordsInput() throws Exception {
+    mockMvc
+        .perform(get("/search").session(authenticatedSession()))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("name=\"keywords\"")));
+  }
+
+  @Test
+  void searchResultsShowsUnmatchedKeywordsWarning() throws Exception {
+    given(petService.searchPets("dog", "", "", "calm"))
+        .willReturn(new com.ac.pettracker.dto.PetSearchResult(List.of(), List.of("calm")));
+
+    mockMvc
+        .perform(
+            get("/pets/results")
+                .session(authenticatedSession())
+                .param("type", "dog")
+                .param("keywords", "calm"))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("calm")))
+        .andExpect(content().string(containsString("No pets found")));
+  }
+
+  @Test
+  void searchResultsShowsPartialUnmatchedKeywordsWhenSomePetsFound() throws Exception {
+    given(petService.searchPets("dog", "", "", "fluffy, playful"))
+        .willReturn(
+            new com.ac.pettracker.dto.PetSearchResult(
+                List.of(
+                    new Pet(
+                        "Biscuit",
+                        "dog",
+                        "Golden Retriever",
+                        5,
+                        "Friendly and fluffy",
+                        "/img/biscuit.jpg",
+                        "female",
+                        70)),
+                List.of("playful")));
+
+    MvcResult result =
+        mockMvc
+            .perform(
+                get("/pets/results")
+                    .session(authenticatedSession())
+                    .param("type", "dog")
+                    .param("keywords", "fluffy, playful"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    String html = result.getResponse().getContentAsString();
+    assertThat(html).contains("Biscuit");
+    assertThat(html).contains("playful");
+  }
+
+  @Test
+  void searchResultsUsesProfileKeywordsWhenFormKeywordsBlank() throws Exception {
+    given(petService.searchPets("dog", "", "", "calm"))
+        .willReturn(new com.ac.pettracker.dto.PetSearchResult(List.of(), List.of("calm")));
+
+    MockHttpSession session = authenticatedSession();
+    session.setAttribute("profileKeywords", "calm");
+
+    mockMvc
+        .perform(get("/pets/results").session(session).param("type", "dog"))
+        .andExpect(status().isOk());
   }
 
   private MockHttpSession authenticatedSession() {

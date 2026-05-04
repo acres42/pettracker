@@ -32,7 +32,7 @@ class SearchControllerErrorTest {
   void missingTypeShowsErrorPage() throws Exception {
     MockHttpSession session = authenticatedSession();
     mockMvc
-        .perform(get("/pets/results").session(session).param("location", "46201"))
+        .perform(get("/pets/results").session(session))
         .andExpect(status().isBadRequest())
         .andExpect(view().name("error"))
         .andExpect(content().string(containsString("Invalid search request")))
@@ -43,23 +43,12 @@ class SearchControllerErrorTest {
   }
 
   @Test
-  void missingLocationShowsErrorPage() throws Exception {
+  void serviceExceptionShowsErrorPage() throws Exception {
+    when(petService.searchPets("dog", "", "", "")).thenThrow(new RuntimeException("boom"));
     MockHttpSession session = authenticatedSession();
+
     mockMvc
         .perform(get("/pets/results").session(session).param("type", "dog"))
-        .andExpect(status().isBadRequest())
-        .andExpect(view().name("error"))
-        .andExpect(content().string(containsString("Invalid search request")));
-  }
-
-  @Test
-  void serviceExceptionShowsErrorPage() throws Exception {
-    when(petService.searchPets("dog", "46201")).thenThrow(new RuntimeException("boom"));
-    MockHttpSession session = authenticatedSession();
-
-    mockMvc
-        .perform(
-            get("/pets/results").session(session).param("type", "dog").param("location", "46201"))
         .andExpect(status().isInternalServerError())
         .andExpect(view().name("error"))
         .andExpect(content().string(containsString("Something went wrong")));

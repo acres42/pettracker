@@ -49,6 +49,7 @@ public class DashboardController {
    * @param age pet age in years
    * @param description pet description
    * @param imageUrl pet image URL
+   * @param gender pet gender (e.g., male, female); blank if unknown
    * @param notes initial user notes
    * @param session the current HTTP session
    * @return a redirect to {@code /dashboard}
@@ -61,6 +62,7 @@ public class DashboardController {
       @RequestParam(defaultValue = "0") int age,
       @RequestParam(defaultValue = "No description available.") String description,
       @RequestParam(defaultValue = "") String imageUrl,
+      @RequestParam(defaultValue = "") String gender,
       @RequestParam(defaultValue = "") String notes,
       HttpSession session) {
     List<SavedPetEntry> savedPets = SessionHelper.getSavedPets(session);
@@ -78,6 +80,7 @@ public class DashboardController {
               age,
               description,
               imageUrl,
+              gender,
               SessionHelper.getSessionString(session, "profileKeywords"),
               notes,
               SavedPetStatus.INTRODUCED,
@@ -136,6 +139,10 @@ public class DashboardController {
               Comparator.comparing(SavedPetEntry::getName, String.CASE_INSENSITIVE_ORDER);
           case "type" ->
               Comparator.comparing(SavedPetEntry::getType, String.CASE_INSENSITIVE_ORDER);
+          case "gender" ->
+              Comparator.comparing(
+                  entry -> entry.getGender() == null ? "" : entry.getGender(),
+                  String.CASE_INSENSITIVE_ORDER);
           case "breed" ->
               Comparator.comparing(SavedPetEntry::getBreed, String.CASE_INSENSITIVE_ORDER);
           case "age" -> Comparator.comparingInt(SavedPetEntry::getAge);

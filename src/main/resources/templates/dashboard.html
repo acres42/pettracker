@@ -45,6 +45,7 @@
           <tr>
             <th><a th:href="@{/dashboard(sort='name',dir='asc')}">Name</a></th>
             <th><a th:href="@{/dashboard(sort='type',dir='asc')}">Type</a></th>
+            <th><a th:href="@{/dashboard(sort='gender',dir='asc')}">Gender</a></th>
             <th><a th:href="@{/dashboard(sort='breed',dir='asc')}">Breed</a></th>
             <th><a th:href="@{/dashboard(sort='age',dir='asc')}">Age</a></th>
             <th><a th:href="@{/dashboard(sort='keywords',dir='asc')}">Keywords</a></th>
@@ -58,6 +59,7 @@
           <tr th:each="pet : ${savedPets}">
             <td data-label="Name" th:text="${pet.name}">Buddy</td>
             <td data-label="Type" th:text="${pet.type}">dog</td>
+            <td data-label="Gender" th:text="${pet.gender != null and !pet.gender.isBlank() ? pet.gender : '—'}">—</td>
             <td data-label="Breed" th:text="${pet.breed}">Golden Retriever</td>
             <td data-label="Age" th:text="${pet.age}">4</td>
             <td data-label="Keywords" th:text="${pet.keywordsDisplay}">calm, fenced yard</td>
@@ -100,7 +102,7 @@
             </td>
           </tr>
           <tr th:if="${#lists.isEmpty(savedPets)}">
-            <td colspan="9">No saved pets yet.</td>
+            <td colspan="10">No saved pets yet.</td>
           </tr>
         </tbody>
       </table>

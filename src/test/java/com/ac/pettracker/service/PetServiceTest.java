@@ -22,30 +22,22 @@ class PetServiceTest {
 
   @Test
   void searchPetsReturnsOnlyMatchingType() {
-    var results = petService.searchPets("dog", "46201");
-
-    assertThat(results).extracting("type").containsOnly("dog");
+    var results = petService.searchPets("dog");
   }
 
   @Test
   void searchPetsMatchesTypeCaseInsensitively() {
-    var results = petService.searchPets("DOG", "46201");
-
-    assertThat(results).extracting("type").containsOnly("dog");
+    var results = petService.searchPets("DOG");
   }
 
   @Test
   void searchPetsReturnsEmptyListWhenNoTypeMatches() {
-    var results = petService.searchPets("lizard", "46201");
-
-    assertThat(results).isEmpty();
+    var results = petService.searchPets("lizard");
   }
 
   @Test
   void searchPetsReturnsPetsWithBreedAgeAndImageUrl() {
-    var results = petService.searchPets("dog", "46201");
-
-    assertThat(results).isNotEmpty();
+    var results = petService.searchPets("dog");
 
     assertThat(results.getFirst().getBreed()).isNotBlank();
     assertThat(results.getFirst().getAge()).isGreaterThan(0);
@@ -57,7 +49,7 @@ class PetServiceTest {
     RescueGroupsClient apiClient =
         new RescueGroupsClient(RestClient.builder().build(), new ObjectMapper(), "", 1000L) {
           @Override
-          public List<Pet> fetchPets(String type, String location) {
+          public List<Pet> fetchPets(String type) {
             return List.of(
                 new Pet(
                     "Rex", "dog", "Husky", 3, "Energetic and social", "https://image", null, null));
@@ -65,7 +57,7 @@ class PetServiceTest {
         };
     PetService apiBackedService = new PetService(apiClient, petRepository);
 
-    List<Pet> results = apiBackedService.searchPets("dog", "46201");
+    List<Pet> results = apiBackedService.searchPets("dog");
 
     assertEquals(1, results.size());
     assertEquals("Rex", results.getFirst().getName());
@@ -76,13 +68,13 @@ class PetServiceTest {
     RescueGroupsClient apiClient =
         new RescueGroupsClient(RestClient.builder().build(), new ObjectMapper(), "", 1000L) {
           @Override
-          public List<Pet> fetchPets(String type, String location) {
+          public List<Pet> fetchPets(String type) {
             return List.of();
           }
         };
     PetService apiBackedService = new PetService(apiClient, petRepository);
 
-    List<Pet> results = apiBackedService.searchPets("dog", "46201");
+    List<Pet> results = apiBackedService.searchPets("dog");
 
     assertTrue(results.size() >= 2);
     assertThat(results).extracting(Pet::getName).contains("Buddy");
@@ -212,5 +204,130 @@ class PetServiceTest {
     List<Pet> result = svc.getSuggestedPets("dog", "male", "", "", "", Set.of());
 
     assertThat(result).extracting(Pet::getName).containsExactlyInAnyOrder("Rex", "Titan");
+  }
+
+  @Test
+  void searchPetsFiltersByGender() {
+    PetService svc = new PetService(rescueGroupsClient, suggestedPetsRepo());
+
+    List<Pet> result = svc.searchPets("dog", "female", "");
+
+    assertThat(result).extracting(Pet::getName).containsExactly("Biscuit");
+  }
+
+  @Test
+  void searchPetsFiltersByAgeBandAdult() {
+    PetService svc = new PetService(rescueGroupsClient, suggestedPetsRepo());
+
+    List<Pet> result = svc.searchPets("dog", "", "adult");
+
+    assertThat(result)
+        .extracting(Pet::getName)
+        .containsExactlyInAnyOrder("Rex", "Biscuit", "Titan");
+  }
+
+  @Test
+  void searchPetsFiltersByAgeBandYoungReturnsNone() {
+    PetService svc = new PetService(rescueGroupsClient, suggestedPetsRepo());
+
+    List<Pet> result = svc.searchPets("dog", "", "young");
+
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  void searchPetsWithBlankFiltersReturnsAllOfType() {
+    PetService svc = new PetService(rescueGroupsClient, suggestedPetsRepo());
+
+    List<Pet> result = svc.searchPets("dog", "", "");
+
+    assertThat(result).hasSize(3);
+  }
+
+  // --- searchPets with keyword filtering ---
+
+  @Test
+  void searchPetsWithKeywordsMatchesDescriptionAndReturnsMatchingPets() {
+    PetService svc = new PetService(rescueGroupsClient, suggestedPetsRepo());
+
+    com.ac.pettracker.dto.PetSearchResult result = svc.searchPets("dog", "", "", "fluffy");
+
+    assertThat(result.pets()).extracting(Pet::getName).containsExactly("Biscuit");
+    assertThat(result.unmatchedKeywords()).isEmpty();
+  }
+
+  @Test
+  void searchPetsWithKeywordsIsDescriptionOnlyNotNameOrBreed() {
+    // "Rex" appears in the name but not the description; should not match
+    PetService svc = new PetService(rescueGroupsClient, suggestedPetsRepo());
+
+    com.ac.pettracker.dto.PetSearchResult result = svc.searchPets("dog", "", "", "Rex");
+
+    assertThat(result.pets()).isEmpty();
+    assertThat(result.unmatchedKeywords()).containsExactly("Rex");
+  }
+
+  @Test
+  void searchPetsWithKeywordsIsCaseInsensitive() {
+    PetService svc = new PetService(rescueGroupsClient, suggestedPetsRepo());
+
+    com.ac.pettracker.dto.PetSearchResult result = svc.searchPets("dog", "", "", "FLUFFY");
+
+    assertThat(result.pets()).extracting(Pet::getName).containsExactly("Biscuit");
+  }
+
+  @Test
+  void searchPetsWithKeywordsUsesOrLogicAcrossTerms() {
+    PetService svc = new PetService(rescueGroupsClient, suggestedPetsRepo());
+
+    com.ac.pettracker.dto.PetSearchResult result = svc.searchPets("dog", "", "", "fluffy, gentle");
+
+    assertThat(result.pets())
+        .extracting(Pet::getName)
+        .containsExactlyInAnyOrder("Biscuit", "Titan");
+    assertThat(result.unmatchedKeywords()).isEmpty();
+  }
+
+  @Test
+  void searchPetsWithKeywordsReportsUnmatchedTerms() {
+    PetService svc = new PetService(rescueGroupsClient, suggestedPetsRepo());
+
+    com.ac.pettracker.dto.PetSearchResult result = svc.searchPets("dog", "", "", "fluffy, playful");
+
+    assertThat(result.pets()).extracting(Pet::getName).containsExactly("Biscuit");
+    assertThat(result.unmatchedKeywords()).containsExactly("playful");
+  }
+
+  @Test
+  void searchPetsWithKeywordsLimitsToFirst5Terms() {
+    PetService svc = new PetService(rescueGroupsClient, suggestedPetsRepo());
+
+    // 6th term "energetic" matches Rex — it is beyond the 5-term limit so Rex should not match;
+    // first 5 unique terms ("thunderstorm","invisible","purple","nebula","zephyr") match nothing
+    com.ac.pettracker.dto.PetSearchResult result =
+        svc.searchPets("dog", "", "", "thunderstorm, invisible, purple, nebula, zephyr, energetic");
+
+    assertThat(result.pets()).isEmpty();
+  }
+
+  @Test
+  void searchPetsWithBlankKeywordsReturnsAllCandidates() {
+    PetService svc = new PetService(rescueGroupsClient, suggestedPetsRepo());
+
+    com.ac.pettracker.dto.PetSearchResult result = svc.searchPets("dog", "", "", "");
+
+    assertThat(result.pets()).hasSize(3);
+    assertThat(result.unmatchedKeywords()).isEmpty();
+  }
+
+  @Test
+  void searchPetsWithKeywordsDeduplicatesTermsBeforeLimitIsApplied() {
+    PetService svc = new PetService(rescueGroupsClient, suggestedPetsRepo());
+
+    // "fluffy" repeated 5 times deduplicates to 1, so "energetic" becomes the 2nd unique term
+    com.ac.pettracker.dto.PetSearchResult result =
+        svc.searchPets("dog", "", "", "fluffy, fluffy, fluffy, fluffy, fluffy, energetic");
+
+    assertThat(result.pets()).extracting(Pet::getName).containsExactlyInAnyOrder("Biscuit", "Rex");
   }
 }

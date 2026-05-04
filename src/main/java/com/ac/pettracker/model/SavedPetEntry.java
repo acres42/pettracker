@@ -17,6 +17,7 @@ public class SavedPetEntry {
   private final int age;
   private final String description;
   private final String imageUrl;
+  private final String gender;
   private final LocalDateTime savedAt;
 
   private String keywords;
@@ -33,6 +34,7 @@ public class SavedPetEntry {
    * @param age pet age in years
    * @param description short description of the pet
    * @param imageUrl URL or path to the pet's image
+   * @param gender pet gender (e.g., male, female); may be null or blank
    * @param keywords profile keywords copied from the user's preferences at save time
    * @param notes user-supplied notes (truncated to 500 characters)
    * @param status initial adoption status
@@ -45,6 +47,7 @@ public class SavedPetEntry {
       int age,
       String description,
       String imageUrl,
+      String gender,
       String keywords,
       String notes,
       SavedPetStatus status,
@@ -56,6 +59,7 @@ public class SavedPetEntry {
     this.age = age;
     this.description = description;
     this.imageUrl = imageUrl;
+    this.gender = gender;
     this.savedAt = LocalDateTime.now();
     this.keywords = keywords;
     setNotes(notes);
@@ -73,6 +77,10 @@ public class SavedPetEntry {
 
   public String getType() {
     return type;
+  }
+
+  public String getGender() {
+    return gender;
   }
 
   public String getBreed() {

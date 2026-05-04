@@ -1,22 +1,24 @@
 # PetTracker
 
-PetTracker is a Spring Boot web application for searching adoptable pets by type and location.
-It uses a server-rendered UI (Thymeleaf), integrates with the RescueGroups API, and falls back to
-local repository data when API results are unavailable.
+PetTracker is a Spring Boot web application for searching adoptable pets by type, gender, age, and
+keywords. It uses a server-rendered UI (Thymeleaf) and is designed to eventually integrate with the
+RescueGroups API, but relies on database seed data as a fallback as of 2026-05-04.
 
 ## Current Status
 
-- API provider: RescueGroups API v5
-- Primary retry strategy in production path: exponential backoff with jitter
-- Alternative strategy implemented for comparison/interview work: token bucket rate limiting
+- API integration: designed for RescueGroups API v5; not yet wired (relies on seed data fallback)
+- Primary retry strategy: exponential backoff with jitter (in place for when API is connected)
+- Alternative strategy: token bucket rate limiting (available for comparison/interview discussion)
+- Search: type, gender, age band, and keyword filters supported
 - Test status: full suite green
 
 ## Features
 
 - Server-rendered UI with Thymeleaf
-- Search form (pet type and location)
-- API-first search with local data fallback
-- MVC architecture (controller/service/repository)
+- Search by pet type, gender, age band, and keywords (up to 5 comma-separated terms)
+- Unmatched keyword reporting on results page
+- API-first search with local seed data fallback
+- MVC architecture (controller/service/repository/dto)
 - TDD workflow with unit and integration tests
 
 ## Tech Stack
@@ -24,6 +26,7 @@ local repository data when API results are unavailable.
 - Java 21
 - Spring Boot 4.1.0-SNAPSHOT
 - Spring Web + RestClient
+- Spring Security 6
 - Thymeleaf
 - Jackson
 - JUnit 5 + MockMvc + Mockito
@@ -37,18 +40,18 @@ Pet search path:
 Browser
     |
     v
-PageController
+SearchController
     |
     v
 PetService
     |
-    +--> RescueGroupsClient (primary API path)
+    +--> RescueGroupsClient (primary API path, not yet connected)
     |       |
     |       +--> success: return API pets
     |       |
     |       +--> failure/empty: return empty list
     |
-    +--> PetRepository (fallback path when API returns empty)
+    +--> PetRepository (fallback: returns local seed data)
                     |
                     +--> return local pets
 ```
@@ -194,10 +197,10 @@ Route            Description
                                  - Shows validation error if present
 
 /pets/results    Search results page
-                                 - Query params: type, location
+                                 - Query params: type, gender, ageBand, keywords
                                  - Valid input: renders results page
                                  - Empty results: shows no-results state
-                                 - Missing/blank input: redirects to /search
+                                 - Missing/blank type: shows error page
 ```
 
 ## Project Structure
@@ -212,7 +215,8 @@ pettracker/
 |   |   |   |-- service/
 |   |   |   |-- repository/
 |   |   |   |-- model/
-|   |   |   `-- integration/
+|   |   |   |-- dto/
+|   |   |   `-- client/
 |   |   |       |-- RescueGroupsClient.java
 |   |   |       |-- RescueGroupsClientTokenBucket.java
 |   |   |       `-- TokenBucket.java
@@ -225,7 +229,7 @@ pettracker/
 |           |-- controller/
 |           |-- service/
 |           |-- repository/
-|           `-- integration/
+|           `-- client/
 |               |-- RescueGroupsClientTest.java
 |               |-- RescueGroupsClientRetryTest.java
 |               |-- RescueGroupsClientTokenBucketTest.java
