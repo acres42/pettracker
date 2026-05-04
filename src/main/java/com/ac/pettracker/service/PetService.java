@@ -1,6 +1,6 @@
 package com.ac.pettracker.service;
 
-import com.ac.pettracker.integration.RescueGroupsClient;
+import com.ac.pettracker.client.RescueGroupsClient;
 import com.ac.pettracker.model.Pet;
 import com.ac.pettracker.model.PetKeys;
 import com.ac.pettracker.repository.PetRepository;

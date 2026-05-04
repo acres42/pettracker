@@ -6,12 +6,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.ac.pettracker.repository.UserPreferencesRepository;
+import com.ac.pettracker.config.SecurityConfig;
+import com.ac.pettracker.security.SessionAuthFilter;
 import com.ac.pettracker.service.AuthService;
 import com.ac.pettracker.service.PetService;
+import com.ac.pettracker.service.ProfileService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -21,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
   DashboardController.class,
   SearchController.class
 })
+@Import({SecurityConfig.class, SessionAuthFilter.class})
 class AuthGuardControllerTest {
 
   @Autowired private MockMvc mockMvc;
@@ -29,7 +33,7 @@ class AuthGuardControllerTest {
 
   @MockitoBean private AuthService authService;
 
-  @MockitoBean private UserPreferencesRepository userPreferencesRepository;
+  @MockitoBean private ProfileService profileService;
 
   @Test
   void unauthenticatedSearchRedirectsHome() throws Exception {

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 /** MVC controller handling user authentication: login, registration, and logout. */
 @Controller
-public class AuthController extends BaseController {
+public class AuthController {
 
   private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 

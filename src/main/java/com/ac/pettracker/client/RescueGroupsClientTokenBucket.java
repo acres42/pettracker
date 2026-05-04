@@ -1,4 +1,4 @@
-package com.ac.pettracker.integration;
+package com.ac.pettracker.client;
 
 import com.ac.pettracker.model.Pet;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClient;
@@ -23,12 +23,12 @@ import org.springframework.web.client.RestClient;
  * retries up to bucket capacity - Then enforces rate limit wait time - Better than backoff when API
  * has known rate limits
  *
- * <p>Interview talking points vs exponential backoff: - Exponential: 1s, 2s, 4s, 8s (you're
- * guessing delays) - Token bucket: Respects actual API rate limit (more intelligent) - Token
- * bucket: Fair queuing (everyone gets same tokens per second) - Use exponential when you don't know
- * rate limit - Use token bucket when you know API limit (e.g., 10 req/sec)
+ * <p>Exponential: 1s, 2s, 4s, 8s (you're guessing delays) - Token bucket: Respects actual API rate
+ * limit (more intelligent) - Token bucket: Fair queuing (everyone gets same tokens per second) -
+ * Use exponential when you don't know rate limit - Use token bucket when you know API limit (e.g.,
+ * 10 req/sec)
  */
-@Component
+@Service
 public class RescueGroupsClientTokenBucket {
 
   private static final Logger logger = LoggerFactory.getLogger(RescueGroupsClientTokenBucket.class);

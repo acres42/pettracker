@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 /** MVC controller handling the saved-pets dashboard: viewing, saving, updating, and deleting. */
 @Controller
-public class DashboardController extends BaseController {
+public class DashboardController {
 
   /**
    * Renders the saved-pets dashboard with optional sorting.
@@ -32,10 +32,7 @@ public class DashboardController extends BaseController {
       @RequestParam(defaultValue = "desc") String dir,
       Model model,
       HttpSession session) {
-    if (!isAuthenticated(session)) {
-      return "redirect:/";
-    }
-    List<SavedPetEntry> savedPets = getSavedPets(session);
+    List<SavedPetEntry> savedPets = SessionHelper.getSavedPets(session);
     savedPets.sort(buildComparator(sort, dir));
     model.addAttribute("savedPets", savedPets);
     model.addAttribute("sort", sort);
@@ -66,10 +63,7 @@ public class DashboardController extends BaseController {
       @RequestParam(defaultValue = "") String imageUrl,
       @RequestParam(defaultValue = "") String notes,
       HttpSession session) {
-    if (!isAuthenticated(session)) {
-      return "redirect:/";
-    }
-    List<SavedPetEntry> savedPets = getSavedPets(session);
+    List<SavedPetEntry> savedPets = SessionHelper.getSavedPets(session);
     String petKey = PetKeys.of(name, type, breed, age);
     boolean alreadySaved =
         savedPets.stream()
@@ -84,7 +78,7 @@ public class DashboardController extends BaseController {
               age,
               description,
               imageUrl,
-              getSessionString(session, "profileKeywords"),
+              SessionHelper.getSessionString(session, "profileKeywords"),
               notes,
               SavedPetStatus.INTRODUCED,
               LocalDate.now()));
@@ -108,10 +102,7 @@ public class DashboardController extends BaseController {
       @RequestParam(defaultValue = "") String notes,
       @RequestParam(defaultValue = "INTRODUCED") SavedPetStatus status,
       HttpSession session) {
-    if (!isAuthenticated(session)) {
-      return "redirect:/";
-    }
-    List<SavedPetEntry> savedPets = getSavedPets(session);
+    List<SavedPetEntry> savedPets = SessionHelper.getSavedPets(session);
     for (SavedPetEntry entry : savedPets) {
       if (entry.getId().equals(id)) {
         entry.setNotes(notes);
@@ -131,10 +122,7 @@ public class DashboardController extends BaseController {
    */
   @PostMapping("/dashboard/delete")
   public String deleteSavedPet(@RequestParam String id, HttpSession session) {
-    if (!isAuthenticated(session)) {
-      return "redirect:/";
-    }
-    List<SavedPetEntry> savedPets = getSavedPets(session);
+    List<SavedPetEntry> savedPets = SessionHelper.getSavedPets(session);
     savedPets.removeIf(entry -> entry.getId().equals(id));
     session.setAttribute("savedPets", savedPets);
     return "redirect:/dashboard";

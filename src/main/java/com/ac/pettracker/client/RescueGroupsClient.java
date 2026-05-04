@@ -1,4 +1,4 @@
-package com.ac.pettracker.integration;
+package com.ac.pettracker.client;
 
 import com.ac.pettracker.model.Pet;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClient;
@@ -22,7 +22,7 @@ import org.springframework.web.client.RestClient;
  * <p>Retries up to {@code MAX_RETRIES} times with jittered exponential delays before giving up and
  * returning an empty list.
  */
-@Component
+@Service
 public class RescueGroupsClient {
 
   private static final Logger logger = LoggerFactory.getLogger(RescueGroupsClient.class);

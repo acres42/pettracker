@@ -1,4 +1,4 @@
-package com.ac.pettracker.integration;
+package com.ac.pettracker.client;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

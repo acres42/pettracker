@@ -1,4 +1,4 @@
-package com.ac.pettracker.integration;
+package com.ac.pettracker.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

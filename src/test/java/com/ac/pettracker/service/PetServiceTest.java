@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.ac.pettracker.integration.RescueGroupsClient;
+import com.ac.pettracker.client.RescueGroupsClient;
 import com.ac.pettracker.model.Pet;
 import com.ac.pettracker.repository.PetRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;

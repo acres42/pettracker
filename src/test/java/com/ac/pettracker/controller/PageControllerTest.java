@@ -2,7 +2,8 @@ package com.ac.pettracker.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,10 +18,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.ac.pettracker.model.Pet;
 import com.ac.pettracker.model.UserAccount;
-import com.ac.pettracker.model.UserPreferences;
-import com.ac.pettracker.repository.UserPreferencesRepository;
 import com.ac.pettracker.service.AuthService;
 import com.ac.pettracker.service.PetService;
+import com.ac.pettracker.service.ProfileService;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -47,7 +47,7 @@ class PageControllerTest {
 
   @MockitoBean private AuthService authService;
 
-  @MockitoBean private UserPreferencesRepository userPreferencesRepository;
+  @MockitoBean private ProfileService profileService;
 
   @Test
   void homePageReturnsIndexView() throws Exception {
@@ -335,6 +335,11 @@ class PageControllerTest {
 
   @Test
   void profileKeywordsPopulateSavedPetDashboardColumn() throws Exception {
+    given(profileService.savePreferences(anyLong(), any(), any(), any(), any(), any()))
+        .willReturn(
+            new com.ac.pettracker.dto.ProfilePreferences(
+                "dog", "", "25-50lbs", "beagle", "calm, fenced yard"));
+
     MvcResult profileResult =
         mockMvc
             .perform(
@@ -646,7 +651,10 @@ class PageControllerTest {
 
   @Test
   void updateProfilePreferencesPersistsToDatabase() throws Exception {
-    given(userPreferencesRepository.findByUserAccountId(1L)).willReturn(java.util.Optional.empty());
+    given(profileService.savePreferences(anyLong(), any(), any(), any(), any(), any()))
+        .willReturn(
+            new com.ac.pettracker.dto.ProfilePreferences(
+                "dog", "male", "25-50lbs", "beagle", "calm"));
 
     mockMvc
         .perform(
@@ -661,27 +669,25 @@ class PageControllerTest {
         .andExpect(status().is3xxRedirection())
         .andExpect(redirectedUrl("/profile"));
 
-    verify(userPreferencesRepository)
-        .save(
-            argThat(
-                prefs ->
-                    "dog".equals(prefs.getPreferredSpecies())
-                        && "male".equals(prefs.getPreferredGender())
-                        && "25-50lbs".equals(prefs.getPreferredWeightBand())
-                        && "beagle".equals(prefs.getPreferredBreed())
-                        && "calm".equals(prefs.getPreferredKeywords())));
+    verify(profileService).savePreferences(1L, "dog", "male", "25-50lbs", "beagle", "calm");
   }
 
   @Test
   void profilePageLoadsPreferencesFromDatabase() throws Exception {
-    UserPreferences storedPrefs = new UserPreferences(1L);
-    storedPrefs.setPreferredSpecies("cat");
-    storedPrefs.setPreferredGender("female");
-    storedPrefs.setPreferredWeightBand("<25 lbs");
-    storedPrefs.setPreferredBreed("tabby");
-    storedPrefs.setPreferredKeywords("quiet");
-    given(userPreferencesRepository.findByUserAccountId(1L))
-        .willReturn(java.util.Optional.of(storedPrefs));
+    // profileService.populateSessionPreferences sets the session attributes;
+    // simulate that by having the mock write them when called.
+    org.mockito.Mockito.doAnswer(
+            inv -> {
+              jakarta.servlet.http.HttpSession s = inv.getArgument(1);
+              s.setAttribute("profileSpecies", "cat");
+              s.setAttribute("profileGender", "female");
+              s.setAttribute("profileWeight", "<25 lbs");
+              s.setAttribute("profileBreed", "tabby");
+              s.setAttribute("profileKeywords", "quiet");
+              return null;
+            })
+        .when(profileService)
+        .populateSessionPreferences(anyLong(), any());
 
     mockMvc
         .perform(get("/profile").session(authenticatedSession()))

@@ -2,8 +2,8 @@ package com.ac.pettracker.controller;
 
 import com.ac.pettracker.dto.PetDto;
 import com.ac.pettracker.dto.PetMapper;
-import com.ac.pettracker.repository.UserPreferencesRepository;
 import com.ac.pettracker.service.PetService;
+import com.ac.pettracker.service.ProfileService;
 import jakarta.servlet.http.HttpSession;
 import java.util.HashSet;
 import java.util.List;
@@ -16,34 +16,31 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 /** MVC controller handling pet search and results. */
 @Controller
-public class SearchController extends BaseController {
+public class SearchController {
 
   private static final Logger logger = LoggerFactory.getLogger(SearchController.class);
 
   private final PetService petService;
-  private final UserPreferencesRepository userPreferencesRepository;
+  private final ProfileService profileService;
 
-  public SearchController(
-      PetService petService, UserPreferencesRepository userPreferencesRepository) {
+  /** Creates a {@code SearchController} with the given services. */
+  public SearchController(PetService petService, ProfileService profileService) {
     this.petService = petService;
-    this.userPreferencesRepository = userPreferencesRepository;
+    this.profileService = profileService;
   }
 
   /**
-   * Renders the pet search form, redirecting to home if the user is not authenticated.
+   * Renders the pet search form.
    *
    * @param query optional pre-filled search query
    * @param model the Spring MVC model
    * @param session the current HTTP session
-   * @return the {@code search} view, or a redirect to {@code /}
+   * @return the {@code search} view
    */
   @GetMapping("/search")
   public String search(
       @RequestParam(name = "q", required = false) String query, Model model, HttpSession session) {
-    if (!isAuthenticated(session)) {
-      return "redirect:/";
-    }
-    loadPreferencesFromDb(session, userPreferencesRepository);
+    profileService.populateSessionPreferences(SessionHelper.getUserId(session), session);
     model.addAttribute("query", query);
 
     // Pass empty savedPetKeys so all matching pets appear in the carousel (saved pets show
@@ -51,17 +48,17 @@ public class SearchController extends BaseController {
     List<PetDto> suggestedPets =
         petService
             .getSuggestedPets(
-                getSessionString(session, "profileSpecies"),
-                getSessionString(session, "profileGender"),
-                getSessionString(session, "profileWeight"),
-                getSessionString(session, "profileBreed"),
-                getSessionString(session, "profileKeywords"),
+                SessionHelper.getSessionString(session, "profileSpecies"),
+                SessionHelper.getSessionString(session, "profileGender"),
+                SessionHelper.getSessionString(session, "profileWeight"),
+                SessionHelper.getSessionString(session, "profileBreed"),
+                SessionHelper.getSessionString(session, "profileKeywords"),
                 new HashSet<>())
             .stream()
             .map(PetMapper::toDto)
             .toList();
     model.addAttribute("suggestedPets", suggestedPets);
-    model.addAttribute("savedPetKeys", buildSavedPetKeys(session));
+    model.addAttribute("savedPetKeys", SessionHelper.buildSavedPetKeys(session));
     return "search";
   }
 
@@ -72,7 +69,7 @@ public class SearchController extends BaseController {
    * @param location the location to search in
    * @param model the Spring MVC model
    * @param session the current HTTP session
-   * @return the {@code results} view, or a redirect to {@code /}
+   * @return the {@code results} view
    */
   @GetMapping("/pets/results")
   public String results(
@@ -80,9 +77,6 @@ public class SearchController extends BaseController {
       @RequestParam(required = false) String location,
       Model model,
       HttpSession session) {
-    if (!isAuthenticated(session)) {
-      return "redirect:/";
-    }
     if (type == null || type.isBlank() || location == null || location.isBlank()) {
       throw new IllegalArgumentException("Missing search parameters");
     }
@@ -92,7 +86,7 @@ public class SearchController extends BaseController {
     model.addAttribute("type", type);
     model.addAttribute("location", location);
     model.addAttribute("pets", pets);
-    model.addAttribute("savedPetKeys", buildSavedPetKeys(session));
+    model.addAttribute("savedPetKeys", SessionHelper.buildSavedPetKeys(session));
     return "results";
   }
 }

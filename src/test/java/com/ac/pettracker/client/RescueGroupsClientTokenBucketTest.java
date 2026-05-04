@@ -1,4 +1,4 @@
-package com.ac.pettracker.integration;
+package com.ac.pettracker.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,11 +36,11 @@ class RescueGroupsClientTokenBucketTest {
             // Succeed on 3rd attempt
             String response =
                 """
-            {
-              "data": [{"type": "animals", "id": "123", "attributes": {"name": "Buddy", "breedId": 1, "ageGroup": "adult", "pictureId": 1}, "relationships": {"breed": {"data": {"type": "breeds", "id": "1"}}, "pictures": {"data": [{"type": "pictures", "id": "1"}]}}}],
-              "included": [{"type": "breeds", "id": "1", "attributes": {"name": "Retriever"}}, {"type": "pictures", "id": "1", "attributes": {"urlSmall": "https://example.com/pic.jpg"}}]
-            }
-            """;
+                {
+                  "data": [{"type": "animals", "id": "123", "attributes": {"name": "Buddy", "breedId": 1, "ageGroup": "adult", "pictureId": 1}, "relationships": {"breed": {"data": {"type": "breeds", "id": "1"}}, "pictures": {"data": [{"type": "pictures", "id": "1"}]}}}],
+                  "included": [{"type": "breeds", "id": "1", "attributes": {"name": "Retriever"}}, {"type": "pictures", "id": "1", "attributes": {"urlSmall": "https://example.com/pic.jpg"}}]
+                }
+                """;
             exchange.getResponseHeaders().set("Content-Type", "application/json");
             exchange.sendResponseHeaders(200, response.length());
             exchange.getResponseBody().write(response.getBytes());
